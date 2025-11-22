@@ -1,5 +1,32 @@
+<<<<<<< HEAD
 node_modules/
 dist/
 .env
 .DS_Store
 coverage/
+=======
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+>>>>>>> 4cb2037be4339485a2d7720527dcb91bc680075f

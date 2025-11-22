@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2062,3 +2063,2069 @@
   </script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MindGuard 2.0 | LSPU</title>
+
+  <!-- Font Awesome (icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- DOMPurify for XSS protection -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+  <!-- Meta tags for security -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;">
+
+  <style>
+    :root{
+      --primary:#006064;
+      --bg:#F5F7FA;
+      --white:#fff;
+      --muted:#666666;
+      --accent:#FFD700;
+      --alert:#D32F2F;
+      --card-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      --radius: 14px;
+      --max-width: 420px;
+      --nav-height: 72px;
+      --font-sans: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      --error: #c62828;
+      --success: #2e7d32;
+      --toast-bg: #323232;
+      --toast-success: #4caf50;
+      --toast-error: #f44336;
+      --toast-info: #2196f3;
+    }
+
+    /* Dark mode support */
+    [data-theme="dark"] {
+      --primary: #4dd0e1;
+      --bg: #1a1a1a;
+      --white: #2d2d2d;
+      --muted: #999;
+      --card-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      --toast-bg: #424242;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background:linear-gradient(180deg, #e9f3f3 0%, #e6eef0 100%);
+      font-family:var(--font-sans);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      color:#222;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      box-sizing:border-box;
+    }
+
+    /* App phone frame */
+    .app {
+      width:100%;
+      max-width:var(--max-width);
+      height:812px;
+      background:var(--bg);
+      border-radius:28px;
+      box-shadow:0 20px 50px rgba(0,0,0,0.15);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+    }
+
+    .content {
+      flex:1;
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+      padding:20px;
+      box-sizing:border-box;
+    }
+
+    .content::-webkit-scrollbar{height:8px;width:8px}
+    .content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:8px}
+
+    header.app-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+    header .meta{line-height:1}
+    header h2{margin:0;color:var(--primary);}
+    header p{margin:0;font-size:12px;color:var(--muted);}
+
+    .screen{display:none}
+    .screen.active{display:block; animation:fadeIn .18s ease both}
+    @keyframes fadeIn{from{opacity:.0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+    .card{
+      background:var(--white);
+      padding:14px;
+      border-radius:var(--radius);
+      box-shadow:var(--card-shadow);
+      margin-bottom:14px;
+    }
+
+    .center {
+      text-align:center;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border:0;
+      border-radius:12px;
+      padding:10px 14px;
+      cursor:pointer;
+      font-size:15px;
+      background:var(--primary);
+      color:var(--white);
+      transition:transform .08s ease, opacity .12s;
+      text-decoration:none;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary)}
+    .btn-small{padding:6px 10px;font-size:13px;border-radius:10px}
+    .btn-alert{background:var(--alert);color:var(--white)}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid #eee}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+
+    .icon-card{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;cursor:pointer;border-radius:12px}
+    .icon-card i{font-size:22px;color:var(--primary);margin-bottom:8px}
+
+    .chat {
+      display:flex;
+      flex-direction:column;
+      height:60vh;
+      min-height:240px;
+      max-height:520px;
+    }
+    .chat-history{
+      flex:1;
+      overflow:auto;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .message{
+      max-width:80%;
+      padding:10px 14px;
+      border-radius:16px;
+      font-size:14px;
+      line-height:1.35;
+      box-shadow:0 1px 2px rgba(0,0,0,0.04);
+      word-break:break-word;
+    }
+    .message.ai{background:var(--white);align-self:flex-start;border-bottom-left-radius:6px}
+    .message.user{background:var(--primary);color:var(--white);align-self:flex-end;border-bottom-right-radius:6px}
+    .typing{font-size:13px;color:var(--muted);font-style:italic;padding:6px 10px}
+
+    .chat-input {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      padding-top:10px;
+      border-top:1px solid #eee;
+    }
+    .chat-input input[type="text"]{
+      flex:1;
+      border-radius:999px;
+      border:1px solid #ddd;
+      padding:12px 14px;
+      outline:none;
+      font-size:14px;
+    }
+    .icon-only{width:46px;height:46px;padding:0;border-radius:10px}
+
+    .mood-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .mood-date{width:60px;font-size:12px;color:var(--muted)}
+    .mood-track{flex:1;height:10px;background:#eee;border-radius:6px;overflow:hidden}
+    .mood-val{height:100%;border-radius:6px}
+
+    nav.navbar{
+      height:var(--nav-height);
+      background:var(--white);
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      border-top:1px solid #eee;
+      position:sticky;
+      bottom:0;
+      z-index:6;
+    }
+    .nav-btn{font-size:20px;color:#bbb;cursor:pointer}
+    .nav-btn.active{color:var(--primary)}
+    .nav-btn .dot{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:var(--accent);border-radius:50%}
+
+    .modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.6);
+      align-items:center;
+      justify-content:center;
+      z-index:999;
+      padding:20px;
+    }
+    .modal.open{display:flex}
+    .modal .panel{background:var(--white);padding:20px;border-radius:16px;max-width:520px;width:100%;}
+
+    .hidden{display:none !important}
+    .muted{color:var(--muted)}
+    small{font-size:12px;color:var(--muted)}
+    .error{color:var(--error);font-size:13px;margin-top:8px}
+    .success{color:var(--success);font-size:13px;margin-top:8px}
+
+    /* Landing layout specific */
+    .landing-actions { display:flex; flex-direction:column; gap:12px; max-width:360px; margin: 18px auto 0; }
+    .landing-actions .btn-outline { background: #fff; border:1px solid #ddd; color:#333; }
+    
+    /* Logo styling */
+    .app-logo {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      margin-bottom: 16px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background: var(--white);
+      padding: 8px;
+    }
+    [data-theme="dark"] .app-logo {
+      background: var(--white);
+    }
+
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+    }
+    .toast {
+      background: var(--toast-bg);
+      color: white;
+      padding: 14px 18px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+      min-width: 280px;
+    }
+    .toast.success { border-left: 4px solid var(--toast-success); }
+    .toast.error { border-left: 4px solid var(--toast-error); }
+    .toast.info { border-left: 4px solid var(--toast-info); }
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .toast-close {
+      margin-left: auto;
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 18px;
+      opacity: 0.7;
+    }
+    .toast-close:hover { opacity: 1; }
+
+    /* Loading spinner */
+    .spinner {
+      border: 3px solid rgba(0,0,0,0.1);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .btn.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    .btn.loading .spinner {
+      margin-right: 8px;
+    }
+
+    /* Skip link for accessibility */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--primary);
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      z-index: 10001;
+    }
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* Onboarding overlay */
+    .onboarding-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 9998;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .onboarding-overlay.active {
+      display: flex;
+    }
+    .onboarding-panel {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    /* Security disclaimer */
+    .security-disclaimer {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    [data-theme="dark"] .security-disclaimer {
+      background: #3e2723;
+      border-left-color: #ff9800;
+    }
+
+    /* Search/filter input */
+    .search-input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      :root {
+        --card-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      }
+      .btn {
+        border: 2px solid currentColor;
+      }
+    }
+
+    /* Focus visible for keyboard navigation */
+    *:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    @media (max-width:420px){
+      .app{height:100vh;border-radius:14px}
+      .chat{height:52vh}
+      .toast-container {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Skip link for accessibility -->
+  <a href="#content" class="skip-link">Skip to main content</a>
+  
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Onboarding overlay -->
+  <div class="onboarding-overlay" id="onboarding-overlay" role="dialog" aria-labelledby="onboarding-title" aria-hidden="true">
+    <div class="onboarding-panel">
+      <h2 id="onboarding-title">Welcome to MindGuard</h2>
+      <p>This is a mental health support app for LSPU students. Here's what you can do:</p>
+      <ul style="margin: 12px 0; padding-left: 20px;">
+        <li>Track your mood daily</li>
+        <li>Chat with our AI assistant</li>
+        <li>Join peer support groups</li>
+        <li>Book counseling sessions</li>
+        <li>Use breathing exercises</li>
+      </ul>
+      <div class="security-disclaimer" style="margin-top: 12px;">
+        <strong>⚠️ Security Notice:</strong> This is a local demo. Data is stored in your browser and is not encrypted. For production use, please implement server-side storage with proper encryption.
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 16px;">
+        <button class="btn" id="onboarding-close">Got it</button>
+        <button class="btn btn-outline" id="onboarding-skip">Skip tour</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app" aria-live="polite">
+    <main class="content" id="content" role="main">
+
+      <!-- LANDING / WELCOME -->
+      <section id="screen-landing" class="screen active" aria-label="Welcome" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+        <img src="mindguardlogo.png" alt="MindGuard Logo" class="app-logo" id="app-logo" />
+        <h1 style="margin:.4rem 0 0;color:var(--primary)">MindGuard</h1>
+        <p class="muted" style="margin:.2rem 0 1rem">Empathetic AI & Crisis Support for LSPU students</p>
+
+        <div class="landing-actions" style="width:100%; max-width:360px;">
+          <button id="btn-start-anon" class="btn" aria-label="Start anonymously">
+            <i class="fa-solid fa-user-secret" aria-hidden="true"></i> Start Anonymously
+          </button>
+          
+          <div style="display:flex;gap:8px;margin:8px 0;">
+            <button id="btn-google-signin" class="btn btn-outline" style="flex:1" aria-label="Sign in with Google">
+              <i class="fa-brands fa-google" aria-hidden="true"></i> Google
+            </button>
+            <button id="btn-facebook-signin" class="btn btn-outline" style="flex:1" aria-label="Sign in with Facebook">
+              <i class="fa-brands fa-facebook" aria-hidden="true"></i> Facebook
+            </button>
+          </div>
+          
+          <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+            <div style="flex:1;height:1px;background:#ddd"></div>
+            <span class="muted" style="font-size:12px">OR</span>
+            <div style="flex:1;height:1px;background:#ddd"></div>
+          </div>
+          
+          <button id="btn-login" class="btn btn-outline" aria-label="Login">
+            <i class="fa-solid fa-sign-in-alt" aria-hidden="true"></i> Login
+          </button>
+          <button id="btn-signup" class="btn btn-outline" aria-label="Sign up">
+            <i class="fa-solid fa-user-plus" aria-hidden="true"></i> Sign Up
+          </button>
+        </div>
+
+        <div class="security-disclaimer" style="margin-top:14px;">
+          <strong>⚠️ Security Notice:</strong> This is a local demo. Data is stored in your browser's localStorage and is not encrypted. For production, implement server-side storage with proper security measures.
+        </div>
+        <small class="muted" style="margin-top:8px;display:block;">Offline supported · Private (local demo)</small>
+      </section>
+
+      <!-- LOGIN -->
+      <section id="screen-login" class="screen" aria-hidden="true">
+        <div style="text-align:center;margin-top:8px;">
+          <h2 style="color:var(--primary);margin:0">Log in</h2>
+          <p class="muted" style="margin-top:6px">Access your account</p>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <label style="display:block;margin-bottom:8px;font-weight:600">Email</label>
+          <input id="login-email" type="email" placeholder="email@lspu.edu.ph" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+          <label style="display:block;margin-top:10px;font-weight:600">Password</label>
+          <input id="login-password" type="password" placeholder="Your password" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+          <div id="login-error" class="error hidden" role="alert"></div>
+
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn" id="login-btn">Log In</button>
+            <button class="btn btn-outline" id="login-to-signup">Create account</button>
+          </div>
+
+          <div style="margin-top:16px">
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <button class="btn btn-outline" id="login-google" style="flex:1" aria-label="Sign in with Google">
+                <i class="fa-brands fa-google" aria-hidden="true"></i> Google
+              </button>
+              <button class="btn btn-outline" id="login-facebook" style="flex:1" aria-label="Sign in with Facebook">
+                <i class="fa-brands fa-facebook" aria-hidden="true"></i> Facebook
+              </button>
+            </div>
+            
+            <div style="text-align:center;margin-top:12px">
+              <small class="muted">Or continue anonymously</small>
+              <div style="margin-top:8px">
+                <button class="btn btn-ghost" id="login-anon">
+                  <i class="fa-solid fa-user-secret" aria-hidden="true"></i> Start anonymously
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SIGNUP -->
+      <section id="screen-signup" class="screen" aria-hidden="true">
+        <div style="text-align:center;margin-top:8px;">
+          <h2 style="color:var(--primary);margin:0">Create account</h2>
+          <p class="muted" style="margin-top:6px">Register with LSPU details (local only)</p>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <label style="display:block;margin-bottom:8px;font-weight:600">Full name</label>
+          <input id="su-fullname" type="text" placeholder="Juan Dela Cruz" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+          <label style="display:block;margin-top:10px;font-weight:600">Student ID</label>
+          <input id="su-studentid" type="text" placeholder="2021001234" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+          <label style="display:block;margin-top:10px;font-weight:600">Program / Course</label>
+          <input id="su-program" type="text" placeholder="BS Information Technology" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+          <label style="display:block;margin-top:10px;font-weight:600">Email</label>
+          <input id="su-email" type="email" placeholder="email@lspu.edu.ph" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+          <label style="display:block;margin-top:10px;font-weight:600">Password</label>
+          <input id="su-password" type="password" placeholder="At least 8 characters" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+          <label style="display:block;margin-top:10px;font-weight:600">Confirm Password</label>
+          <input id="su-password-confirm" type="password" placeholder="Re-enter password" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+          <div id="signup-error" class="error hidden" role="alert"></div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn" id="signup-btn">Sign Up</button>
+            <button class="btn btn-outline" id="signup-to-login">Have an account? Login</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- DASHBOARD -->
+      <section id="screen-dashboard" class="screen" aria-hidden="true">
+        <header class="app-header" role="banner">
+          <div class="meta">
+            <h2 id="greeting">Hi, Student</h2>
+            <p id="date-display">Loading date...</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn btn-small" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme"><i class="fa-solid fa-moon" aria-hidden="true"></i></button>
+            <button class="btn btn-small" id="notif-btn" aria-label="Notifications"><i class="fa-regular fa-bell" aria-hidden="true"></i></button>
+            <button class="btn btn-outline btn-small" id="open-profile" title="Open profile" aria-label="Open profile"><i class="fa-solid fa-user" aria-hidden="true"></i></button>
+          </div>
+        </header>
+
+        <div class="card" aria-labelledby="mood-label">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong id="mood-label">How are you feeling?</strong>
+            <small class="muted" id="mood-last">No recent mood</small>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;margin-top:12px;">
+            <button class="icon-card" data-mood="Great" data-val="5" aria-label="Great mood"><i class="fa-solid fa-face-laugh-beam" aria-hidden="true"></i><div style="font-size:12px;margin-top:6px">Great</div></button>
+            <button class="icon-card" data-mood="Good" data-val="4" aria-label="Good mood"><i class="fa-solid fa-face-smile" aria-hidden="true"></i><div style="font-size:12px;margin-top:6px">Good</div></button>
+            <button class="icon-card" data-mood="Okay" data-val="3" aria-label="Okay mood"><i class="fa-solid fa-face-meh" aria-hidden="true"></i><div style="font-size:12px;margin-top:6px">Okay</div></button>
+            <button class="icon-card" data-mood="Down" data-val="2" aria-label="Down mood"><i class="fa-solid fa-face-frown" aria-hidden="true"></i><div style="font-size:12px;margin-top:6px">Down</div></button>
+            <button class="icon-card" data-mood="Crisis" data-val="1" aria-label="Crisis mood"><i class="fa-solid fa-face-sad-cry" aria-hidden="true"></i><div style="font-size:12px;margin-top:6px">Crisis</div></button>
+          </div>
+        </div>
+
+        <h3 style="margin:8px 0 6px;color:var(--primary)">Quick Actions</h3>
+
+        <div class="grid-2">
+          <div class="card icon-card" data-target="screen-chat" role="button" tabindex="0" aria-label="Go to AI chat">
+            <i class="fa-solid fa-robot" aria-hidden="true"></i><div style="font-size:13px;margin-top:6px">AI Chat</div>
+          </div>
+          <div class="card icon-card" data-target="screen-coping" role="button" tabindex="0" aria-label="Open breathing exercises">
+            <i class="fa-solid fa-lungs" aria-hidden="true"></i><div style="font-size:13px;margin-top:6px">Breathe</div>
+          </div>
+          <div class="card icon-card" data-target="screen-groups" role="button" tabindex="0" aria-label="Peer groups">
+            <i class="fa-solid fa-users" aria-hidden="true"></i><div style="font-size:13px;margin-top:6px">Peers</div>
+          </div>
+          <div class="card icon-card" data-target="screen-booking" role="button" tabindex="0" aria-label="Book counselor">
+            <i class="fa-solid fa-calendar-check" aria-hidden="true"></i><div style="font-size:13px;margin-top:6px">Counselor</div>
+          </div>
+        </div>
+
+        <div class="card" style="background:#FFEBEE;border-left:4px solid var(--alert)">
+          <strong style="color:var(--alert)">Need immediate help?</strong>
+          <p style="margin:.4rem 0 .6rem;font-size:13px">LSPU Safety & Security is available 24/7.</p>
+          <a href="tel:911" class="btn btn-alert btn-small" style="text-decoration:none;display:inline-block">Call Emergency</a>
+        </div>
+      </section>
+
+      <!-- CHAT -->
+      <section id="screen-chat" class="screen" aria-hidden="true">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <button class="btn btn-small" id="chat-back" aria-label="Back to dashboard"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+          <h3 style="margin:0;">MindGuard AI</h3>
+        </div>
+
+        <div class="card chat" role="region" aria-label="Chat with MindGuard">
+          <div class="chat-history" id="chat-history" aria-live="polite" tabindex="0"></div>
+
+          <div id="typing-indicator" class="typing hidden" aria-hidden="true">MindGuard is typing <span aria-hidden="true">...</span></div>
+
+          <div class="chat-input" role="form" aria-label="Send message">
+            <input type="text" id="chat-input" placeholder="Type here..." aria-label="Message input" />
+            <button class="btn icon-only" id="send-btn" title="Send message" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- GROUPS -->
+      <section id="screen-groups" class="screen" aria-hidden="true">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <button class="btn btn-small" data-back="screen-dashboard" aria-label="Back to dashboard"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+          <h3 style="margin:0">Ka-PEER Yu Groups</h3>
+        </div>
+
+        <p class="muted">Join a student-led support group. Anonymous & safe.</p>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Academic Anxiety</strong>
+            <span class="muted" style="font-size:12px;background:#E0F7FA;padding:6px 8px;border-radius:10px;color:var(--primary)">Online</span>
+          </div>
+          <p style="font-size:13px;margin:.45rem 0 0">Tuesdays · 5PM · Facilitator: Denmhar</p>
+          <div style="margin-top:10px">
+            <button class="btn btn-outline btn-small join-btn" data-group="Academic Anxiety">Join Group</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Social Isolation</strong>
+            <span class="muted" style="font-size:12px;background:#FFF3E0;padding:6px 8px;border-radius:10px;color:orange">Hybrid</span>
+          </div>
+          <p style="font-size:13px;margin:.45rem 0 0">Fridays · 3PM · Facilitator: Nicole</p>
+          <div style="margin-top:10px">
+            <button class="btn btn-outline btn-small join-btn" data-group="Social Isolation">Join Group</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOOKING -->
+      <section id="screen-booking" class="screen" aria-hidden="true">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <button class="btn btn-small" data-back="screen-dashboard" aria-label="Back to dashboard"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+          <h3 style="margin:0">Book Counselor</h3>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:.2rem 0">Select a date</h4>
+          <input type="date" id="book-date" style="width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;margin-bottom:10px" aria-label="Select booking date" />
+
+          <h4 style="margin:.2rem 0">Select time</h4>
+          <select id="book-time" style="width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;margin-bottom:10px" aria-label="Select booking time">
+            <option value="09:00">9:00 AM - 10:00 AM</option>
+            <option value="10:00">10:00 AM - 11:00 AM</option>
+            <option value="14:00">2:00 PM - 3:00 PM</option>
+          </select>
+
+          <h4 style="margin:.2rem 0">Mode</h4>
+          <div style="display:flex;gap:12px;margin-bottom:12px">
+            <label style="font-size:14px"><input type="radio" name="mode" value="online" checked> Online (Zoom)</label>
+            <label style="font-size:14px"><input type="radio" name="mode" value="f2f"> Face-to-Face (LSPU)</label>
+          </div>
+
+          <button class="btn" id="confirm-book">Confirm Booking</button>
+        </div>
+
+        <div id="booking-status" class="card hidden" aria-live="polite">
+          <i class="fa-solid fa-circle-check" style="color:green;font-size:22px;margin-right:8px" aria-hidden="true"></i><span id="booking-msg">Request sent.</span>
+        </div>
+      </section>
+
+      <!-- COPING -->
+      <section id="screen-coping" class="screen" aria-hidden="true">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <button class="btn btn-small" data-back="screen-dashboard" aria-label="Back to dashboard"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+          <h3 style="margin:0">My Wellness</h3>
+        </div>
+
+        <div class="card" style="background:var(--primary);color:white">
+          <div style="display:flex;align-items:center;gap:12px">
+            <i class="fa-solid fa-wind" style="font-size:30px" aria-hidden="true"></i>
+            <div>
+              <strong>4-7-8 Breathing</strong>
+              <p style="margin:4px 0 0;color:#E0F7FA;font-size:13px">Calm anxiety in under a minute.</p>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <button class="btn" id="start-breath">Start Exercise</button>
+            <p id="breath-timer" style="text-align:center;font-weight:600;margin-top:10px;display:none">Inhale... 4</p>
+          </div>
+        </div>
+
+        <h4 style="margin:12px 0 8px">Mood History</h4>
+        <div class="card">
+          <input type="text" class="search-input" id="mood-search" placeholder="Search mood history..." aria-label="Search mood history">
+          <div id="history-list">
+          <p class="muted">No moods logged yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section id="screen-profile" class="screen" aria-hidden="true">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <button class="btn btn-small" data-back="screen-dashboard" aria-label="Back to dashboard"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+          <h3 style="margin:0">My Profile</h3>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <strong id="profile-name">Full Name</strong>
+              <div id="profile-email" class="muted" style="font-size:13px">email@lspu.edu.ph</div>
+            </div>
+            <div style="text-align:right">
+              <button class="btn btn-outline btn-small" id="edit-profile">Edit</button>
+              <button class="btn btn-alert btn-small" id="logout-btn" style="margin-left:6px">Logout</button>
+            </div>
+          </div>
+
+          <div id="profile-details" style="margin-top:12px">
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+              <div style="width:120px;color:var(--muted)">Student ID</div><div id="profile-studentid">-</div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+              <div style="width:120px;color:var(--muted)">Program</div><div id="profile-program">-</div>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee">
+            <h4 style="margin-bottom:8px">Emergency Contacts</h4>
+            <div id="emergency-contacts-list">
+              <p class="muted" style="font-size:13px">No emergency contacts added.</p>
+            </div>
+            <button class="btn btn-outline btn-small" id="add-emergency-contact" style="margin-top:8px">Add Contact</button>
+          </div>
+
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee">
+            <h4 style="margin-bottom:8px">Data & Privacy</h4>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-outline btn-small" id="export-data">Export My Data</button>
+              <button class="btn btn-alert btn-small" id="delete-account">Delete Account</button>
+            </div>
+          </div>
+
+          <!-- Edit form (hidden initially) -->
+          <form id="profile-form" class="hidden" style="margin-top:12px" onsubmit="return false">
+            <label style="display:block;margin-bottom:6px;font-weight:600">Full name</label>
+            <input id="pf-fullname" type="text" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+            <label style="display:block;margin-top:10px;font-weight:600">Student ID</label>
+            <input id="pf-studentid" type="text" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+            <label style="display:block;margin-top:10px;font-weight:600">Program</label>
+            <input id="pf-program" type="text" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+            <label style="display:block;margin-top:10px;font-weight:600">Change password (optional)</label>
+            <input id="pf-password" type="password" placeholder="New password (leave blank to keep current)" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd" />
+
+            <div id="profile-save-error" class="error hidden"></div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn" id="save-profile">Save</button>
+              <button class="btn btn-outline" id="cancel-profile">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="navbar" id="main-nav" aria-label="Main navigation" style="display:none">
+      <div class="nav-btn active" data-target="screen-dashboard" aria-label="Home"><i class="fa-solid fa-house" aria-hidden="true"></i></div>
+      <div class="nav-btn" data-target="screen-chat" aria-label="Chat"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i></div>
+      <div class="nav-btn" data-target="screen-coping" aria-label="Coping"><i class="fa-solid fa-chart-simple" aria-hidden="true"></i></div>
+      <div class="nav-btn" data-target="screen-groups" aria-label="Profile"><i class="fa-solid fa-user" aria-hidden="true"></i></div>
+    </nav>
+
+    <!-- Crisis Modal -->
+    <div id="crisis-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="crisis-title">
+      <div class="panel">
+        <div style="text-align:center">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size:36px;color:var(--alert)" aria-hidden="true"></i>
+          <h3 id="crisis-title" style="margin:.4rem 0 0">We are worried about you</h3>
+          <p class="muted" style="margin:.4rem 0">You mentioned something that sounds heavy. Please let us help keep you safe.</p>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin:10px 0">
+            <a href="tel:911" class="btn btn-alert" style="text-decoration:none" aria-label="Call emergency services">Call Emergency (911)</a>
+            <a href="tel:0966-725-5961" class="btn btn-alert btn-outline" style="text-decoration:none" aria-label="Call National Suicide Prevention Hotline">National Suicide Prevention Hotline</a>
+            <a href="sms:741741" class="btn btn-outline" style="text-decoration:none" aria-label="Text Crisis Text Line">Text Crisis Text Line (741741)</a>
+            <button class="btn btn-outline" id="share-location-crisis" aria-label="Share location">Share Location (with consent)</button>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+            <button class="btn btn-outline" id="connect-counsel">Connect to LSPU Counselor</button>
+            <button class="btn" id="modal-safe">I'm safe, back to chat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* -------------------------
+       Helpers & Utilities
+       ------------------------- */
+    const qs = s => document.querySelector(s);
+    const qsa = s => Array.from(document.querySelectorAll(s));
+    const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]));
+    
+    // Use DOMPurify if available, fallback to escapeHtml
+    function sanitizeHtml(str) {
+      if (typeof DOMPurify !== 'undefined') {
+        return DOMPurify.sanitize(str, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+      }
+      return escapeHtml(str);
+    }
+    
+    // Toast notification system
+    function showToast(message, type = 'info', duration = 4000) {
+      const container = qs('#toast-container');
+      if (!container) return;
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'assertive');
+      
+      const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+      toast.innerHTML = `
+        <span>${icon}</span>
+        <span>${sanitizeHtml(message)}</span>
+        <button class="toast-close" aria-label="Close notification" onclick="this.parentElement.remove()">×</button>
+      `;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+    
+    // Loading state helper
+    function setLoading(button, isLoading) {
+      if (!button) return;
+      if (isLoading) {
+        button.classList.add('loading');
+        button.disabled = true;
+        if (!button.querySelector('.spinner')) {
+          const spinner = document.createElement('span');
+          spinner.className = 'spinner';
+          spinner.setAttribute('aria-hidden', 'true');
+          button.insertBefore(spinner, button.firstChild);
+        }
+      } else {
+        button.classList.remove('loading');
+        button.disabled = false;
+        const spinner = button.querySelector('.spinner');
+        if (spinner) spinner.remove();
+      }
+    }
+    
+    // Rate limiting (client-side simulation)
+    const rateLimits = {
+      login: { count: 0, resetTime: 0 },
+      signup: { count: 0, resetTime: 0 }
+    };
+    function checkRateLimit(action, maxAttempts = 5, windowMs = 15 * 60 * 1000) {
+      const now = Date.now();
+      const limit = rateLimits[action] || { count: 0, resetTime: 0 };
+      
+      if (now > limit.resetTime) {
+        limit.count = 0;
+        limit.resetTime = now + windowMs;
+      }
+      
+      if (limit.count >= maxAttempts) {
+        const minutesLeft = Math.ceil((limit.resetTime - now) / 60000);
+        showToast(`Too many attempts. Please try again in ${minutesLeft} minute(s).`, 'error');
+        return false;
+      }
+      
+      limit.count++;
+      rateLimits[action] = limit;
+      return true;
+    }
+
+    /* -------------------------
+       Storage keys & state
+       ------------------------- */
+    const KEYS = {
+      USERS: 'mindguard_users_v2',         // array of user objects
+      SESSION: 'mindguard_session_v2',     // { email, anon: boolean, createdAt }
+      MOODS: 'mindguard_moods_v2',        // array
+      GROUPS: 'mindguard_groups_v2',      // array
+      BOOKINGS: 'mindguard_bookings_v2',   // array
+      EMERGENCY_CONTACTS: 'mindguard_emergency_v2', // array
+      THEME: 'mindguard_theme_v2',        // 'light' | 'dark'
+      ONBOARDING_SHOWN: 'mindguard_onboarding_v2' // boolean
+    };
+
+    const STATE = {
+      context: { topic: 'general', riskLevel: 0 },
+      breathTimerRef: null,
+      encryptionKey: null // Will be set if user enables encryption
+    };
+    
+    // Encryption utilities (Web Crypto API)
+    async function deriveEncryptionKey(password) {
+      try {
+        const encoder = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey(
+          'raw',
+          encoder.encode(password),
+          { name: 'PBKDF2' },
+          false,
+          ['deriveBits', 'deriveKey']
+        );
+        return await crypto.subtle.deriveKey(
+          {
+            name: 'PBKDF2',
+            salt: encoder.encode('mindguard-salt-v1'),
+            iterations: 100000,
+            hash: 'SHA-256'
+          },
+          keyMaterial,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+      } catch (err) {
+        console.error('Encryption key derivation failed:', err);
+        return null;
+      }
+    }
+    
+    async function encryptData(data, key) {
+      if (!key) return data; // No encryption if key not available
+      try {
+        const encoder = new TextEncoder();
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encrypted = await crypto.subtle.encrypt(
+          { name: 'AES-GCM', iv },
+          key,
+          encoder.encode(JSON.stringify(data))
+        );
+        return {
+          encrypted: Array.from(new Uint8Array(encrypted)),
+          iv: Array.from(iv)
+        };
+      } catch (err) {
+        console.error('Encryption failed:', err);
+        return data;
+      }
+    }
+    
+    async function decryptData(encryptedData, key) {
+      if (!key || !encryptedData.encrypted) return encryptedData;
+      try {
+        const decoder = new TextDecoder();
+        const decrypted = await crypto.subtle.decrypt(
+          { name: 'AES-GCM', iv: new Uint8Array(encryptedData.iv) },
+          key,
+          new Uint8Array(encryptedData.encrypted)
+        );
+        return JSON.parse(decoder.decode(decrypted));
+      } catch (err) {
+        console.error('Decryption failed:', err);
+        return encryptedData;
+      }
+    }
+
+    /* -------------------------
+       Password hashing (SHA-256) using SubtleCrypto
+       Returns hex digest string.
+       ------------------------- */
+    async function hashPassword(password) {
+      if (!password) return '';
+      try {
+        const enc = new TextEncoder();
+        const data = enc.encode(password);
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        const h = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+        return h;
+      } catch (err) {
+        console.warn('SubtleCrypto not available, falling back (insecure).', err);
+        return password;
+      }
+    }
+
+    /* -------------------------
+       LocalStorage wrappers
+       ------------------------- */
+    function loadJSON(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        return JSON.parse(raw) || [];
+      } catch (e) {
+        console.error('Storage read error', key, e);
+        return [];
+      }
+    }
+    function saveJSON(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.error('Storage write error', key, e);
+      }
+    }
+    function setSession(sessionObj) {
+      localStorage.setItem(KEYS.SESSION, JSON.stringify(sessionObj));
+    }
+    function clearSession() {
+      localStorage.removeItem(KEYS.SESSION);
+    }
+    function getSession() {
+      try {
+        const raw = localStorage.getItem(KEYS.SESSION);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch { return null; }
+    }
+
+    /* -------------------------
+       User management
+       ------------------------- */
+    function findUserByEmail(email) {
+      if (!email) return null;
+      const all = loadJSON(KEYS.USERS);
+      return all.find(u => u.email.toLowerCase() === email.toLowerCase()) || null;
+    }
+    function saveUser(user) {
+      const all = loadJSON(KEYS.USERS);
+      const idx = all.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase());
+      if (idx >= 0) all[idx] = user;
+      else all.unshift(user);
+      saveJSON(KEYS.USERS, all);
+    }
+
+    /* -------------------------
+       Auth flows
+       ------------------------- */
+    async function signupHandler() {
+      const btn = qs('#signup-btn');
+      if (!checkRateLimit('signup')) return;
+      
+      setLoading(btn, true);
+      const fullname = sanitizeHtml(qs('#su-fullname').value.trim());
+      const studentid = qs('#su-studentid').value.trim();
+      const program = sanitizeHtml(qs('#su-program').value.trim());
+      const email = qs('#su-email').value.trim().toLowerCase();
+      const password = qs('#su-password').value;
+      const confirm = qs('#su-password-confirm').value;
+      const errEl = qs('#signup-error');
+      errEl.classList.add('hidden'); errEl.textContent = '';
+
+      try {
+        if (!fullname) { 
+          errEl.textContent = 'Full name required.'; 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return; 
+        }
+        if (!studentid || !validateStudentID(studentid)) { 
+          errEl.textContent = 'Valid student ID required (8-10 digits).'; 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return; 
+        }
+        if (!program) { 
+          errEl.textContent = 'Program required.'; 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return; 
+        }
+        if (!email || !validateEmail(email)) { 
+          errEl.textContent = 'Valid LSPU email required (email@lspu.edu.ph).'; 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return; 
+        }
+        
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.valid) {
+          errEl.textContent = 'Password requirements: ' + passwordValidation.errors.join(', '); 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return;
+        }
+        
+        if (password !== confirm) { 
+          errEl.textContent = 'Passwords do not match.'; 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return; 
+        }
+        if (findUserByEmail(email)) { 
+          errEl.textContent = 'An account with that email exists.'; 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return; 
+        }
+
+      const hashed = await hashPassword(password);
+      const user = { fullname, studentid, program, email, passwordHash: hashed, createdAt: new Date().toISOString() };
+      saveUser(user);
+      setSession({ email, anon: false, createdAt: new Date().toISOString() });
+      qs('#su-password').value = '';
+      qs('#su-password-confirm').value = '';
+      populateProfileUI(user);
+        showToast('Account created successfully!', 'success');
+      navigateTo('screen-dashboard');
+      updateNavVisibility();
+      } catch (err) {
+        console.error('Signup error:', err);
+        showToast('An error occurred during signup', 'error');
+      } finally {
+        setLoading(btn, false);
+      }
+    }
+
+    async function loginHandler() {
+      const btn = qs('#login-btn');
+      if (!checkRateLimit('login')) return;
+      
+      setLoading(btn, true);
+      const email = qs('#login-email').value.trim().toLowerCase();
+      const password = qs('#login-password').value;
+      const errEl = qs('#login-error');
+      errEl.classList.add('hidden'); errEl.textContent = '';
+
+      try {
+        if (!email || !validateEmail(email)) { 
+          errEl.textContent = 'Enter a valid email.'; 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return; 
+        }
+        if (!password) { 
+          errEl.textContent = 'Enter your password.'; 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return; 
+        }
+
+      const user = findUserByEmail(email);
+        if (!user) { 
+          errEl.textContent = 'Account not found.'; 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return; 
+        }
+
+      const hashed = await hashPassword(password);
+        if (hashed !== user.passwordHash) { 
+          errEl.textContent = 'Invalid credentials.'; 
+          errEl.classList.remove('hidden'); 
+          setLoading(btn, false);
+          return; 
+        }
+
+      setSession({ email, anon: false, createdAt: new Date().toISOString() });
+      qs('#login-password').value = '';
+      populateProfileUI(user);
+        showToast('Welcome back!', 'success');
+      navigateTo('screen-dashboard');
+      updateNavVisibility();
+      } catch (err) {
+        console.error('Login error:', err);
+        showToast('An error occurred during login', 'error');
+      } finally {
+        setLoading(btn, false);
+      }
+    }
+
+    function startAnonymous() {
+      // create ephemeral anonymous session; no stored user
+      setSession({ email: null, anon: true, createdAt: new Date().toISOString() });
+      populateAnonymousUI();
+      navigateTo('screen-dashboard');
+      updateNavVisibility();
+      showToast('Started anonymous session', 'info', 2000);
+    }
+    
+    // Social login handler (demo - requires backend OAuth implementation)
+    async function handleSocialLogin(provider, mode = 'login') {
+      // In a real implementation, this would:
+      // 1. Redirect to OAuth provider (Google/Facebook)
+      // 2. Handle OAuth callback
+      // 3. Exchange code for access token
+      // 4. Get user info from provider
+      // 5. Create/update user in database
+      // 6. Set JWT session token
+      
+      // For demo purposes, we'll simulate the flow
+      showToast(`Signing in with ${provider}...`, 'info', 2000);
+      
+      // Simulate OAuth flow
+      setTimeout(() => {
+        // In production, you would:
+        // - Use Firebase Auth, Auth0, or custom OAuth
+        // - Get user email, name, and profile picture
+        // - Create account if new, or login if exists
+        
+        const mockUser = {
+          email: `user@${provider}.com`,
+          fullname: `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`,
+          studentid: '00000000', // Would be filled from LSPU database
+          program: 'To be updated',
+          provider: provider,
+          createdAt: new Date().toISOString()
+        };
+        
+        // Check if user exists
+        const existingUser = findUserByEmail(mockUser.email);
+        if (existingUser) {
+          // Login existing user
+          setSession({ email: mockUser.email, anon: false, createdAt: new Date().toISOString() });
+          populateProfileUI(existingUser);
+          showToast(`Welcome back! Signed in with ${provider}`, 'success');
+          navigateTo('screen-dashboard');
+        } else if (mode === 'signup') {
+          // Create new account
+          // In production, you'd prompt for student ID and program
+          hashPassword('social-login-' + Date.now()).then(hashed => {
+            mockUser.passwordHash = hashed;
+            saveUser(mockUser);
+            setSession({ email: mockUser.email, anon: false, createdAt: new Date().toISOString() });
+            populateProfileUI(mockUser);
+            showToast(`Account created with ${provider}! Please update your student details.`, 'success');
+            navigateTo('screen-profile');
+            updateNavVisibility();
+          });
+          return;
+        } else {
+          showToast(`No account found. Please sign up first.`, 'error');
+          navigateTo('screen-signup');
+        }
+        updateNavVisibility();
+      }, 1500);
+    }
+
+    function logoutHandler() {
+      clearSession();
+      navigateTo('screen-landing');
+      updateNavVisibility();
+    }
+
+    /* -------------------------
+       Navigation & protection
+       ------------------------- */
+    const PROTECTED_SCREENS = ['screen-chat','screen-groups','screen-booking','screen-profile'];
+
+    function isLoggedIn() {
+      const s = getSession();
+      if (!s) return false;
+      if (s.anon) return false;
+      if (!s.email) return false;
+      return !!findUserByEmail(s.email);
+    }
+
+    function isAnonymous() {
+      const s = getSession();
+      return !!(s && s.anon === true);
+    }
+
+    function navigateTo(screenId) {
+      // if trying to go to protected screen and not logged in (nor anonymous allowed), redirect to login
+      if (PROTECTED_SCREENS.includes(screenId) && !isLoggedIn()) {
+        // For some screens (like groups/bookings/chat), allow anonymous but prompt to sign up for persistence.
+        if (isAnonymous()) {
+          // let anonymous in, but set a notice in UI (simple alert for now)
+          // user can still proceed
+        } else {
+          showLoginNotice('You must be logged in to access that screen.');
+          return navigateTo('screen-login');
+        }
+      }
+
+      qsa('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.setAttribute('aria-hidden','true');
+      });
+      const target = qs('#' + screenId);
+      if (target) {
+        target.classList.add('active');
+        target.setAttribute('aria-hidden','false');
+      }
+
+      // bottom nav state
+      qsa('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.target === screenId));
+      updateNavVisibility();
+
+      setTimeout(() => {
+        const focusable = target && target.querySelector('button, [tabindex], input, select, textarea');
+        if (focusable) focusable.focus();
+      }, 80);
+    }
+
+    function updateNavVisibility() {
+      const mainNav = qs('#main-nav');
+      const active = qsa('.screen.active')[0];
+      if (!active) return;
+      if (active.id === 'screen-landing' || active.id === 'screen-login' || active.id === 'screen-signup') {
+        mainNav.style.display = 'none';
+      } else {
+        mainNav.style.display = 'flex';
+      }
+    }
+
+    function showLoginNotice(msg) {
+      const el = qs('#login-error');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    /* -------------------------
+       Profile UI population
+       ------------------------- */
+    function populateProfileUI(user) {
+      if (!user) return;
+      qs('#profile-name').textContent = user.fullname;
+      qs('#profile-email').textContent = user.email;
+      qs('#profile-studentid').textContent = user.studentid || '-';
+      qs('#profile-program').textContent = user.program || '-';
+      qs('#greeting').textContent = `Hi, ${user.fullname.split(' ')[0] || 'Student'}`;
+      qs('#mood-last').textContent = 'No recent mood';
+    }
+    function populateAnonymousUI() {
+      qs('#profile-name').textContent = 'Anonymous';
+      qs('#profile-email').textContent = 'anonymous';
+      qs('#profile-studentid').textContent = '-';
+      qs('#profile-program').textContent = '-';
+      qs('#greeting').textContent = 'Hi, there';
+      qs('#mood-last').textContent = 'No recent mood';
+    }
+
+    /* -------------------------
+       Boot & UI wiring
+       ------------------------- */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Date display
+      const options = { weekday: 'long', month: 'short', day: 'numeric' };
+      qs('#date-display').textContent = new Date().toLocaleDateString(undefined, options);
+
+      // Landing buttons
+      qs('#btn-start-anon').addEventListener('click', () => startAnonymous());
+      qs('#btn-login').addEventListener('click', () => navigateTo('screen-login'));
+      qs('#btn-signup').addEventListener('click', () => navigateTo('screen-signup'));
+      
+      // Social login buttons (landing page)
+      qs('#btn-google-signin')?.addEventListener('click', () => handleSocialLogin('google'));
+      qs('#btn-facebook-signin')?.addEventListener('click', () => handleSocialLogin('facebook'));
+
+      // Login/signup connections
+      qs('#login-btn').addEventListener('click', () => loginHandler());
+      qs('#login-to-signup').addEventListener('click', () => navigateTo('screen-signup'));
+      qs('#login-anon').addEventListener('click', () => startAnonymous());
+      
+      // Social login on login screen
+      qs('#login-google')?.addEventListener('click', () => handleSocialLogin('google'));
+      qs('#login-facebook')?.addEventListener('click', () => handleSocialLogin('facebook'));
+
+      qs('#signup-btn').addEventListener('click', () => signupHandler());
+      qs('#signup-to-login').addEventListener('click', () => navigateTo('screen-login'));
+      
+      // Social signup on signup screen
+      qs('#signup-google')?.addEventListener('click', () => handleSocialLogin('google', 'signup'));
+      qs('#signup-facebook')?.addEventListener('click', () => handleSocialLogin('facebook', 'signup'));
+      qs('#signup-anon')?.addEventListener('click', () => startAnonymous());
+
+      // Profile open & logout
+      qs('#open-profile').addEventListener('click', () => {
+        if (isLoggedIn()) {
+          const s = getSession(); populateProfileUI(findUserByEmail(s.email));
+          renderEmergencyContacts();
+          navigateTo('screen-profile');
+        } else if (isAnonymous()) {
+          populateAnonymousUI();
+          renderEmergencyContacts();
+          navigateTo('screen-profile');
+        } else {
+          navigateTo('screen-login');
+        }
+      });
+      qs('#logout-btn').addEventListener('click', () => logoutHandler());
+
+      // Profile edit handlers
+      qs('#edit-profile').addEventListener('click', () => {
+        const s = getSession();
+        if (!s) return navigateTo('screen-login');
+        if (s.anon) {
+          showToast('Anonymous profile cannot be edited. Sign up to save your profile.', 'info');
+          return;
+        }
+        const user = findUserByEmail(s.email);
+        if (!user) return navigateTo('screen-login');
+        qs('#profile-form').classList.remove('hidden');
+        qs('#profile-details').classList.add('hidden');
+        qs('#pf-fullname').value = user.fullname;
+        qs('#pf-studentid').value = user.studentid;
+        qs('#pf-program').value = user.program;
+      });
+      qs('#cancel-profile').addEventListener('click', () => {
+        qs('#profile-form').classList.add('hidden');
+        qs('#profile-details').classList.remove('hidden');
+      });
+      qs('#save-profile').addEventListener('click', async () => {
+        const s = getSession();
+        if (!s || s.anon) return navigateTo('screen-login');
+        const user = findUserByEmail(s.email);
+        if (!user) return navigateTo('screen-login');
+
+        const fullname = qs('#pf-fullname').value.trim();
+        const studentid = qs('#pf-studentid').value.trim();
+        const program = qs('#pf-program').value.trim();
+        const newPass = qs('#pf-password').value;
+        const errEl = qs('#profile-save-error'); errEl.classList.add('hidden'); errEl.textContent = '';
+
+        if (!fullname) { errEl.textContent = 'Full name required.'; errEl.classList.remove('hidden'); return; }
+        if (!studentid) { errEl.textContent = 'Student ID required.'; errEl.classList.remove('hidden'); return; }
+
+        user.fullname = fullname;
+        user.studentid = studentid;
+        user.program = program;
+
+        if (newPass) {
+          if (newPass.length < 8) { errEl.textContent = 'New password must be at least 8 characters.'; errEl.classList.remove('hidden'); return; }
+          user.passwordHash = await hashPassword(newPass);
+          qs('#pf-password').value = '';
+        }
+        saveUser(user);
+        populateProfileUI(user);
+        qs('#profile-form').classList.add('hidden');
+        qs('#profile-details').classList.remove('hidden');
+        showToast('Profile updated successfully', 'success');
+      });
+
+      // Nav wiring
+      qsa('.icon-card[data-target]').forEach(el => el.addEventListener('click', () => navigateTo(el.dataset.target)));
+      qsa('.nav-btn').forEach(b => b.addEventListener('click', () => navigateTo(b.dataset.target)));
+      qs('#chat-back').addEventListener('click', () => navigateTo('screen-dashboard'));
+      qs('#notif-btn').addEventListener('click', () => showToast('No new notifications', 'info'));
+
+      // Mood buttons
+      qsa('.icon-card[data-mood]').forEach(btn => btn.addEventListener('click', () => {
+        const allowed = isLoggedIn() || isAnonymous();
+        if (!allowed) { showLoginNotice('Please log in to log mood.'); navigateTo('screen-login'); return; }
+        logMood(btn.dataset.mood, Number(btn.dataset.val));
+      }));
+
+      // Groups join
+      qsa('.join-btn').forEach(btn => btn.addEventListener('click', () => {
+        const allowed = isLoggedIn() || isAnonymous();
+        if (!allowed) { showLoginNotice('Please log in to join groups.'); navigateTo('screen-login'); return; }
+        toggleGroupJoin(btn.dataset.group, btn);
+      }));
+      
+      // Keyboard navigation improvements
+      document.addEventListener('keydown', (e) => {
+        // Escape key closes modals
+        if (e.key === 'Escape') {
+          const modal = qs('.modal.open');
+          if (modal) {
+            closeModal();
+          }
+          const onboarding = qs('#onboarding-overlay.active');
+          if (onboarding) {
+            closeOnboarding(true);
+          }
+        }
+      });
+
+      // Booking
+      qs('#confirm-book').addEventListener('click', () => {
+        const allowed = isLoggedIn() || isAnonymous();
+        if (!allowed) { showLoginNotice('Please log in to book.'); navigateTo('screen-login'); return; }
+        submitBooking();
+      });
+
+      // Breathing
+      qs('#start-breath').addEventListener('click', () => {
+        const allowed = isLoggedIn() || isAnonymous();
+        if (!allowed) { showLoginNotice('Please log in to use breathing tool.'); navigateTo('screen-login'); return; }
+        startBreathing();
+      });
+
+      // Chat send
+      qs('#send-btn').addEventListener('click', () => {
+        const allowed = isLoggedIn() || isAnonymous();
+        if (!allowed) { showLoginNotice('Please log in to chat.'); navigateTo('screen-login'); return; }
+        sendUserMessage();
+      });
+      qs('#chat-input').addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+          const allowed = isLoggedIn() || isAnonymous();
+          if (!allowed) { showLoginNotice('Please log in to chat.'); navigateTo('screen-login'); return; }
+          sendUserMessage();
+        }
+      });
+
+      // Crisis modal
+      qs('#connect-counsel').addEventListener('click', () => { closeModal(); navigateTo('screen-booking'); });
+      qs('#modal-safe').addEventListener('click', () => closeModal());
+
+      // Initialize theme
+      initTheme();
+      
+      // Theme toggle
+      qs('#theme-toggle')?.addEventListener('click', toggleTheme);
+      
+      // Onboarding
+      qs('#onboarding-close')?.addEventListener('click', () => closeOnboarding(false));
+      qs('#onboarding-skip')?.addEventListener('click', () => closeOnboarding(true));
+      
+      // Data export/delete
+      qs('#export-data')?.addEventListener('click', exportUserData);
+      qs('#delete-account')?.addEventListener('click', deleteAccount);
+      
+      // Emergency contacts
+      qs('#add-emergency-contact')?.addEventListener('click', () => {
+        const name = prompt('Contact name:');
+        const phone = prompt('Phone number:');
+        if (name && phone) {
+          saveEmergencyContact({ name: sanitizeHtml(name), phone: sanitizeHtml(phone) });
+          showToast('Emergency contact added', 'success');
+        }
+      });
+      
+      // Location sharing
+      qs('#share-location-btn')?.addEventListener('click', shareLocation);
+      qs('#share-location-crisis')?.addEventListener('click', shareLocation);
+      
+      // Mood search
+      qs('#mood-search')?.addEventListener('input', (e) => {
+        filterMoodHistory(e.target.value);
+      });
+      
+      // Render emergency contacts
+      renderEmergencyContacts();
+
+      // initial state
+      const s = getSession();
+      if (s && s.anon) {
+        populateAnonymousUI();
+        navigateTo('screen-dashboard');
+      } else if (isLoggedIn()) {
+        const u = findUserByEmail(getSession().email);
+        if (u) populateProfileUI(u);
+        navigateTo('screen-dashboard');
+      } else {
+        navigateTo('screen-landing');
+        // Show onboarding on first visit
+        setTimeout(() => showOnboarding(), 500);
+      }
+
+      // load persisted
+      renderMoodHistory();
+      restoreGroupButtons();
+      restoreBookings();
+
+      // initial AI greeting (if allowed)
+      if (isLoggedIn() || isAnonymous()) {
+        setTimeout(() => addAIMessage("Hello. I'm MindGuard. I'm here to listen without judgment. How are things going today?"), 700);
+      }
+      
+      // Service Worker registration for offline support
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {
+          // Service worker not available, continue without it
+        });
+      }
+    });
+
+    /* -------------------------
+       Chat engine
+       ------------------------- */
+    const chatHistoryEl = qs('#chat-history');
+    const typingEl = qs('#typing-indicator');
+
+    function addMessage(contents, cls='ai') {
+      const div = document.createElement('article');
+      div.className = 'message ' + (cls === 'user' ? 'user' : 'ai');
+      div.setAttribute('role', 'article');
+      div.setAttribute('aria-label', cls === 'user' ? 'Your message' : 'AI response');
+      // Use DOMPurify for sanitization
+      div.textContent = sanitizeHtml(contents);
+      chatHistoryEl.appendChild(div);
+      chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
+    }
+
+    function addAIMessage(text) { setTyping(false); addMessage(text, 'ai'); }
+    function setTyping(show) { typingEl.classList.toggle('hidden', !show); typingEl.setAttribute('aria-hidden', String(!show)); if (show) chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight; }
+
+    function sendUserMessage() {
+      const input = qs('#chat-input');
+      const text = (input.value || '').trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      input.value = '';
+      chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
+      setTyping(true);
+      const delay = 900 + Math.floor(Math.random() * 800);
+      setTimeout(() => processAIResponse(text), delay);
+    }
+
+    function sanitizeLower(s){ return String(s || '').toLowerCase(); }
+
+    function processAIResponse(text) {
+      setTyping(false);
+      const lower = sanitizeLower(text);
+
+      const crisisPatterns = [
+        /(?:kill(?:ing)?\s?myself|\bkill myself\b|\bsuicide\b|\bend it all\b|\bwant to die\b|\bi will die\b|\bi'm going to die\b|\bworthless\b|\bhurt myself\b)/i
+      ];
+      const isCrisis = crisisPatterns.some(rx => rx.test(text));
+
+      if (isCrisis) {
+        STATE.context.riskLevel = 2;
+        openModal();
+        addAIMessage("I'm listening. This sounds serious. Are you safe right now? If you are in immediate danger, please call local emergency services.");
+        return;
+      }
+
+      if (/\b(school|exam|grade|fail|assignment|deadline)\b/i.test(text)) {
+        STATE.context.topic = 'academic';
+        addAIMessage("Academic pressure can feel overwhelming. What's the most immediate school-related worry for you?");
+        return;
+      }
+
+      if (/\b(sad|lonely|depressed|cry)\b/i.test(text)) {
+        addAIMessage("I'm sorry you're feeling sad. Would you like to tell me more about what's been happening?");
+        return;
+      }
+
+      if (/\b(anxious|panic|scared|worried)\b/i.test(text)) {
+        addAIMessage("That sounds stressful. Do you want to try a short breathing exercise together?");
+        return;
+      }
+
+      const generic = [
+        "I hear you. Tell me more about that.",
+        "Thank you for sharing that with me. How does that make you feel?",
+        "It's okay to feel this way. I'm here to listen."
+      ];
+      addAIMessage(generic[Math.floor(Math.random() * generic.length)]);
+    }
+
+    function openModal() {
+      const m = qs('#crisis-modal');
+      m.classList.add('open');
+      m.setAttribute('aria-hidden','false');
+      qs('#connect-counsel').focus();
+    }
+    function closeModal() {
+      const m = qs('#crisis-modal');
+      m.classList.remove('open');
+      m.setAttribute('aria-hidden','true');
+      qs('#chat-input')?.focus();
+    }
+
+    /* -------------------------
+       Mood tracker, groups, booking, breathing
+       ------------------------- */
+    function logMood(mood, val) {
+      const entry = { mood, val: Number(val), date: new Date().toISOString(), by: getSessionIdentifier() };
+      const history = loadJSON(KEYS.MOODS) || [];
+      history.unshift(entry);
+      if (history.length > 100) history.splice(100);
+      saveJSON(KEYS.MOODS, history);
+      qs('#mood-last').textContent = `Logged "${mood}" just now.`;
+      showToast(`Mood "${mood}" logged`, 'success', 2000);
+      renderMoodHistory();
+    }
+
+    function getSessionIdentifier() {
+      const s = getSession();
+      if (!s) return 'unknown';
+      if (s.anon) return 'anonymous';
+      return s.email || 'unknown';
+    }
+
+    function renderMoodHistory() {
+      const listEl = qs('#history-list');
+      const history = loadJSON(KEYS.MOODS);
+      if (!history.length) { listEl.innerHTML = '<p class="muted">No moods logged yet.</p>'; return; }
+      const entries = history.slice(0,6);
+      const html = entries.map(it => {
+        const d = new Date(it.date);
+        const dateStr = (d.getMonth()+1) + '/' + d.getDate();
+        const width = Math.round((it.val / 5) * 100);
+        const color = it.val < 3 ? '#ef5350' : '#006064';
+        return `
+          <div class="mood-bar">
+            <div class="mood-date">${escapeHtml(dateStr)}</div>
+            <div class="mood-track" aria-hidden="true">
+              <div class="mood-val" style="width:${width}%;background:${color}"></div>
+            </div>
+            <div style="width:70px;text-align:right;font-size:12px">${escapeHtml(it.mood)}</div>
+          </div>
+        `;
+      }).join('');
+      listEl.innerHTML = html;
+    }
+
+    function toggleGroupJoin(name, btnEl) {
+      const joined = loadJSON(KEYS.GROUPS) || [];
+      const idx = joined.indexOf(name);
+      if (idx >= 0) {
+        joined.splice(idx,1);
+        saveJSON(KEYS.GROUPS, joined);
+        updateJoinButton(btnEl, false);
+        showToast(`You left the ${name} group.`, 'info');
+      } else {
+        joined.push(name);
+        saveJSON(KEYS.GROUPS, joined);
+        updateJoinButton(btnEl, true);
+        showToast(`You have anonymously joined the ${name} group.`, 'success');
+      }
+    }
+    function updateJoinButton(btn, isJoined) {
+      if (isJoined) {
+        btn.textContent = 'Joined ✓';
+        btn.classList.remove('btn-outline');
+        btn.classList.add('btn-small');
+        btn.style.backgroundColor = '#4CAF50';
+        btn.style.color = '#fff';
+      } else {
+        btn.textContent = 'Join Group';
+        btn.classList.add('btn-outline');
+        btn.style.backgroundColor = '';
+        btn.style.color = '';
+      }
+    }
+    function restoreGroupButtons() {
+      const joined = loadJSON(KEYS.GROUPS) || [];
+      qsa('.join-btn').forEach(btn => updateJoinButton(btn, joined.includes(btn.dataset.group)));
+    }
+
+    function submitBooking() {
+      const date = qs('#book-date').value;
+      const time = qs('#book-time').value;
+      const mode = qs('input[name="mode"]:checked')?.value || 'online';
+      if (!date) { showToast('Please select a date', 'error'); qs('#book-date').focus(); return; }
+      const bookings = loadJSON(KEYS.BOOKINGS) || [];
+      bookings.unshift({ date, time, mode, createdAt: new Date().toISOString(), by: getSessionIdentifier() });
+      saveJSON(KEYS.BOOKINGS, bookings);
+      qs('#booking-msg').textContent = `Appointment requested for ${date} at ${time} (${mode}).`;
+      qs('#booking-status').classList.remove('hidden');
+      showToast('Appointment requested successfully', 'success');
+      setTimeout(() => {
+        qs('#booking-status').classList.add('hidden');
+        navigateTo('screen-dashboard');
+      }, 2000);
+    }
+    function restoreBookings() { loadJSON(KEYS.BOOKINGS); }
+
+    function startBreathing() {
+      const timerEl = qs('#breath-timer');
+      timerEl.style.display = 'block';
+      const steps = [
+        { label: 'Inhale... 4', duration: 4000 },
+        { label: 'Hold... 7', duration: 7000 },
+        { label: 'Exhale... 8', duration: 8000 }
+      ];
+      let elapsed = 0, cycles = 0;
+      timerEl.textContent = steps[0].label;
+      clearInterval(STATE.breathTimerRef);
+      STATE.breathTimerRef = setInterval(() => {
+        elapsed += 1000;
+        if (elapsed >= steps[0].duration && elapsed < (steps[0].duration + steps[1].duration)) {
+          timerEl.textContent = steps[1].label;
+        } else if (elapsed >= (steps[0].duration + steps[1].duration) && elapsed < (steps[0].duration + steps[1].duration + steps[2].duration)) {
+          timerEl.textContent = steps[2].label;
+        } else if (elapsed >= (steps[0].duration + steps[1].duration + steps[2].duration)) {
+          elapsed = 0;
+          cycles++;
+          if (cycles >= 2) {
+            timerEl.textContent = 'Well done.';
+            clearInterval(STATE.breathTimerRef);
+          } else {
+            timerEl.textContent = steps[0].label;
+          }
+        }
+      }, 1000);
+    }
+
+    /* -------------------------
+       Validation utilities
+       ------------------------- */
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+    
+    function validateStudentID(studentId) {
+      // LSPU student IDs are typically numeric, 8-10 digits
+      return /^\d{8,10}$/.test(studentId);
+    }
+    
+    function validatePassword(password) {
+      // At least 8 chars, one uppercase, one lowercase, one number
+      const minLength = password.length >= 8;
+      const hasUpper = /[A-Z]/.test(password);
+      const hasLower = /[a-z]/.test(password);
+      const hasNumber = /\d/.test(password);
+      return {
+        valid: minLength && hasUpper && hasLower && hasNumber,
+        errors: [
+          !minLength && 'At least 8 characters',
+          !hasUpper && 'One uppercase letter',
+          !hasLower && 'One lowercase letter',
+          !hasNumber && 'One number'
+        ].filter(Boolean)
+      };
+    }
+    
+    // Replace alert with toast
+    function alert(msg) { 
+      showToast(msg, 'info', 3000);
+    }
+    
+    // Theme management
+    function initTheme() {
+      const saved = localStorage.getItem(KEYS.THEME) || 'light';
+      setTheme(saved);
+    }
+    
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem(KEYS.THEME, theme);
+      const icon = qs('#theme-toggle i');
+      if (icon) {
+        icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        icon.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      }
+    }
+    
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = current === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+      showToast(`Switched to ${newTheme} mode`, 'success', 2000);
+    }
+    
+    // Onboarding
+    function showOnboarding() {
+      const shown = localStorage.getItem(KEYS.ONBOARDING_SHOWN);
+      if (shown === 'true') return;
+      
+      const overlay = qs('#onboarding-overlay');
+      if (overlay) {
+        overlay.classList.add('active');
+        overlay.setAttribute('aria-hidden', 'false');
+        qs('#onboarding-close')?.focus();
+      }
+    }
+    
+    function closeOnboarding(skipTour = false) {
+      const overlay = qs('#onboarding-overlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+        overlay.setAttribute('aria-hidden', 'true');
+      }
+      if (!skipTour) {
+        localStorage.setItem(KEYS.ONBOARDING_SHOWN, 'true');
+      }
+    }
+    
+    // Data export
+    function exportUserData() {
+      try {
+        const session = getSession();
+        if (!session || session.anon) {
+          showToast('Please log in to export data', 'error');
+          return;
+        }
+        
+        const data = {
+          user: findUserByEmail(session.email),
+          moods: loadJSON(KEYS.MOODS).filter(m => m.by === session.email),
+          groups: loadJSON(KEYS.GROUPS),
+          bookings: loadJSON(KEYS.BOOKINGS).filter(b => b.by === session.email),
+          emergencyContacts: loadJSON(KEYS.EMERGENCY_CONTACTS),
+          exportDate: new Date().toISOString()
+        };
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mindguard-data-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Data exported successfully', 'success');
+      } catch (err) {
+        console.error('Export failed:', err);
+        showToast('Failed to export data', 'error');
+      }
+    }
+    
+    // Delete account
+    function deleteAccount() {
+      if (!confirm('Are you sure? This will permanently delete all your data. This action cannot be undone.')) {
+        return;
+      }
+      
+      try {
+        const session = getSession();
+        if (!session || session.anon) {
+          showToast('Please log in to delete account', 'error');
+          return;
+        }
+        
+        // Remove user from users list
+        const users = loadJSON(KEYS.USERS);
+        const filtered = users.filter(u => u.email !== session.email);
+        saveJSON(KEYS.USERS, filtered);
+        
+        // Remove user's data
+        const moods = loadJSON(KEYS.MOODS).filter(m => m.by !== session.email);
+        saveJSON(KEYS.MOODS, moods);
+        
+        const bookings = loadJSON(KEYS.BOOKINGS).filter(b => b.by !== session.email);
+        saveJSON(KEYS.BOOKINGS, bookings);
+        
+        clearSession();
+        showToast('Account deleted successfully', 'success');
+        setTimeout(() => navigateTo('screen-landing'), 1000);
+      } catch (err) {
+        console.error('Delete failed:', err);
+        showToast('Failed to delete account', 'error');
+      }
+    }
+    
+    // Emergency contacts management
+    function loadEmergencyContacts() {
+      return loadJSON(KEYS.EMERGENCY_CONTACTS);
+    }
+    
+    function saveEmergencyContact(contact) {
+      const contacts = loadEmergencyContacts();
+      contacts.push({ ...contact, id: Date.now().toString() });
+      saveJSON(KEYS.EMERGENCY_CONTACTS, contacts);
+      renderEmergencyContacts();
+    }
+    
+    function deleteEmergencyContact(id) {
+      const contacts = loadEmergencyContacts().filter(c => c.id !== id);
+      saveJSON(KEYS.EMERGENCY_CONTACTS, contacts);
+      renderEmergencyContacts();
+    }
+    
+    function renderEmergencyContacts() {
+      const container = qs('#emergency-contacts-list');
+      if (!container) return;
+      
+      const contacts = loadEmergencyContacts();
+      if (contacts.length === 0) {
+        container.innerHTML = '<p class="muted" style="font-size:13px">No emergency contacts added.</p>';
+        return;
+      }
+      
+      container.innerHTML = contacts.map(c => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#f5f5f5;border-radius:8px;margin-bottom:8px">
+          <div>
+            <strong>${sanitizeHtml(c.name)}</strong>
+            <div style="font-size:12px;color:var(--muted)">${sanitizeHtml(c.phone)}</div>
+          </div>
+          <a href="tel:${c.phone}" class="btn btn-small" aria-label="Call ${sanitizeHtml(c.name)}">
+            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+          </a>
+        </div>
+      `).join('');
+    }
+    
+    // Location sharing (with consent)
+    function shareLocation() {
+      if (!navigator.geolocation) {
+        showToast('Geolocation not supported', 'error');
+        return;
+      }
+      
+      if (!confirm('Share your location with emergency contacts? This requires your consent.')) {
+        return;
+      }
+      
+      setLoading(qs('#share-location-btn') || qs('#share-location-crisis'), true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const contacts = loadEmergencyContacts();
+          if (contacts.length === 0) {
+            showToast('Add emergency contacts first', 'error');
+            setLoading(qs('#share-location-btn') || qs('#share-location-crisis'), false);
+            return;
+          }
+          
+          // In a real app, this would send to backend/contacts
+          const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+          showToast(`Location: ${locationUrl}`, 'info', 5000);
+          setLoading(qs('#share-location-btn') || qs('#share-location-crisis'), false);
+        },
+        (error) => {
+          showToast('Failed to get location: ' + error.message, 'error');
+          setLoading(qs('#share-location-btn') || qs('#share-location-crisis'), false);
+        }
+      );
+    }
+    
+    // Mood search/filter
+    function filterMoodHistory(searchTerm) {
+      const history = loadJSON(KEYS.MOODS);
+      if (!searchTerm.trim()) {
+        renderMoodHistory();
+        return;
+      }
+      
+      const filtered = history.filter(m => 
+        m.mood.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        new Date(m.date).toLocaleDateString().includes(searchTerm)
+      );
+      
+      const listEl = qs('#history-list');
+      if (!listEl) return;
+      
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<p class="muted">No matching moods found.</p>';
+        return;
+      }
+      
+      const html = filtered.slice(0, 20).map(it => {
+        const d = new Date(it.date);
+        const dateStr = (d.getMonth()+1) + '/' + d.getDate();
+        const width = Math.round((it.val / 5) * 100);
+        const color = it.val < 3 ? '#ef5350' : '#006064';
+        return `
+          <div class="mood-bar">
+            <div class="mood-date">${escapeHtml(dateStr)}</div>
+            <div class="mood-track" aria-hidden="true">
+              <div class="mood-val" style="width:${width}%;background:${color}"></div>
+            </div>
+            <div style="width:70px;text-align:right;font-size:12px">${escapeHtml(it.mood)}</div>
+          </div>
+        `;
+      }).join('');
+      listEl.innerHTML = html;
+    }
+
+    // Expose tiny debug API
+    window.MindGuard = { getSession, loadJSON, saveJSON, findUserByEmail };
+
+  </script>
+</body>
+</html>
+>>>>>>> 4cb2037be4339485a2d7720527dcb91bc680075f
