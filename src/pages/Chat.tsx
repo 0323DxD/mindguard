@@ -98,51 +98,64 @@ export const Chat: React.FC = () => {
     processAIResponse(text);
   };
 
+import { FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
+
+// ... (keep interfaces and state logic same)
+
   return (
-    <div className="flex flex-col h-full relative bg-gray-50">
-      <div className="flex items-center gap-2 mb-4 shrink-0 px-4 pt-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
-          ←
-        </Button>
-        <h3 className="text-xl font-bold text-primary m-0">MindGuard AI</h3>
+    <div className="flex flex-col h-full bg-gray-50">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-3 shrink-0">
+        <button 
+          onClick={() => navigate('/dashboard')}
+          className="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full shadow-sm hover:bg-primary-light transition-colors"
+        >
+          <FaArrowLeft size={16} />
+        </button>
+        <h3 className="text-xl font-bold text-gray-800 m-0">MindGuard AI</h3>
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-        <div className="flex-1 overflow-y-auto px-4 pt-2 pb-32 flex flex-col gap-4">
+      {/* Chat Card */}
+      <div className="flex-1 mx-4 mb-4 bg-white rounded-[32px] shadow-sm flex flex-col overflow-hidden relative border border-gray-100">
+        <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4 pb-24">
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`max-w-[85%] p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm break-words ${
+              className={`max-w-[85%] p-4 rounded-2xl text-[15px] leading-relaxed break-words ${
                 msg.sender === 'user'
                   ? 'bg-primary text-white self-end rounded-br-sm'
-                  : 'bg-white text-gray-800 self-start rounded-bl-sm border border-gray-100'
+                  : 'bg-white border border-gray-100 text-gray-800 self-start rounded-bl-sm shadow-sm'
               }`}
             >
               {msg.text}
             </div>
           ))}
           {isTyping && (
-            <div className="text-sm text-gray-500 italic p-2 self-start animate-pulse">
+            <div className="text-sm text-gray-400 italic p-2 self-start animate-pulse">
               MindGuard is typing...
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-transparent">
-          <form onSubmit={handleSend} className="flex gap-3 items-center max-w-md mx-auto w-full">
-            <div className="flex-1 shadow-sm rounded-full">
+        {/* Input Area */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100">
+          <form onSubmit={handleSend} className="flex gap-3 items-center">
+            <div className="flex-1">
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Type here..."
-                className="w-full rounded-full border-gray-200 focus:border-primary"
-                style={{ marginBottom: 0, fontSize: '16px' }} 
+                className="w-full rounded-full border-gray-200 focus:border-primary bg-transparent"
+                style={{ marginBottom: 0, fontSize: '15px' }} 
               />
             </div>
-            <Button type="submit" className="rounded-full px-6 h-[54px] shrink-0 shadow-md bg-primary hover:bg-primary-light transition-colors">
-              Send
-            </Button>
+            <button 
+              type="submit" 
+              className="w-12 h-12 flex items-center justify-center bg-primary text-white rounded-xl shadow-md hover:bg-primary-light transition-colors shrink-0"
+            >
+              <FaPaperPlane size={18} className="-ml-1" /> {/* Slight offset for visual center */}
+            </button>
           </form>
         </div>
       </div>
