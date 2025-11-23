@@ -24,7 +24,7 @@ export const Profile: React.FC = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="small" onClick={() => navigate('/dashboard')}>
+        <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
           ←
         </Button>
         <h3 className="text-xl font-bold text-primary m-0">My Profile</h3>
@@ -37,8 +37,8 @@ export const Profile: React.FC = () => {
             <div className="text-sm text-gray-500">{user.email}</div>
           </div>
           <div className="flex gap-2">
-             <Button variant="outline" size="small">Edit</Button>
-             <Button variant="primary" size="small" className="bg-red-600 hover:bg-red-700 border-red-600" onClick={handleLogout}>Logout</Button>
+             <Button variant="outline" size="sm">Edit</Button>
+             <Button variant="primary" size="sm" className="bg-red-600 hover:bg-red-700 border-red-600" onClick={handleLogout}>Logout</Button>
           </div>
         </div>
 
@@ -56,8 +56,8 @@ export const Profile: React.FC = () => {
         <div className="border-t border-gray-100 pt-4 mt-4">
           <h4 className="font-bold mb-2">Data & Privacy</h4>
           <div className="flex flex-col gap-2">
-            <Button variant="outline" size="small">Export My Data</Button>
-            <Button variant="outline" size="small" className="text-red-600 border-red-200 hover:bg-red-50">Delete Account</Button>
+            <Button variant="outline" size="sm">Export My Data</Button>
+            <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50">Delete Account</Button>
           </div>
         </div>
       </Card>

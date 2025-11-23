@@ -28,7 +28,7 @@ export const Groups: React.FC = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="small" onClick={() => navigate('/dashboard')}>
+        <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
           ←
         </Button>
         <h3 className="text-xl font-bold text-primary m-0">Ka-PEER Yu Groups</h3>
@@ -48,7 +48,7 @@ export const Groups: React.FC = () => {
             {group.schedule} · Facilitator: {group.facilitator}
           </p>
           <div className="mt-2">
-            <Button variant="outline" size="small" className="w-full">
+            <Button variant="outline" size="sm" className="w-full">
               Join Group
             </Button>
           </div>

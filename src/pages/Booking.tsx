@@ -10,7 +10,7 @@ export const Booking: React.FC = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="small" onClick={() => navigate('/dashboard')}>
+        <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
           ←
         </Button>
         <h3 className="text-xl font-bold text-primary m-0">Book Counselor</h3>
