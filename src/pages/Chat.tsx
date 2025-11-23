@@ -117,7 +117,7 @@ export const Chat: React.FC = () => {
       </div>
 
       {/* Chat Card */}
-      <div className="flex-1 mx-4 mb-4 bg-white rounded-[32px] shadow-sm flex flex-col overflow-hidden relative border border-gray-100">
+      <div className="flex-1 bg-white rounded-[32px] shadow-sm flex flex-col overflow-hidden relative border border-gray-100">
         <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4 pb-24">
           {messages.map((msg) => (
             <div
