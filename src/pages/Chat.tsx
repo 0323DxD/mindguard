@@ -99,53 +99,53 @@ export const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full relative">
-      <div className="flex items-center gap-2 mb-4 shrink-0">
+    <div className="flex flex-col h-full relative bg-gray-50">
+      <div className="flex items-center gap-2 mb-4 shrink-0 px-4 pt-4">
         <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
           ←
         </Button>
         <h3 className="text-xl font-bold text-primary m-0">MindGuard AI</h3>
       </div>
 
-      <Card className="flex-1 flex flex-col overflow-hidden relative" padding={false}>
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 pb-20">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+        <div className="flex-1 overflow-y-auto px-4 pt-2 pb-32 flex flex-col gap-4">
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`max-w-[80%] p-3 rounded-2xl text-sm shadow-sm break-words ${
+              className={`max-w-[85%] p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm break-words ${
                 msg.sender === 'user'
-                  ? 'bg-primary text-white self-end rounded-br-md'
-                  : 'bg-gray-100 text-gray-800 self-start rounded-bl-md'
+                  ? 'bg-primary text-white self-end rounded-br-sm'
+                  : 'bg-white text-gray-800 self-start rounded-bl-sm border border-gray-100'
               }`}
             >
               {msg.text}
             </div>
           ))}
           {isTyping && (
-            <div className="text-xs text-gray-500 italic p-2">
+            <div className="text-sm text-gray-500 italic p-2 self-start animate-pulse">
               MindGuard is typing...
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 border-t border-gray-100 p-3 bg-white">
-          <form onSubmit={handleSend} className="flex gap-2 items-center">
-            <div className="flex-1">
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-transparent">
+          <form onSubmit={handleSend} className="flex gap-3 items-center max-w-md mx-auto w-full">
+            <div className="flex-1 shadow-sm rounded-full">
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Type here..."
-                className="w-full rounded-full"
-                style={{ marginBottom: 0 }} // Override default margin
+                className="w-full rounded-full border-gray-200 focus:border-primary"
+                style={{ marginBottom: 0, fontSize: '16px' }} 
               />
             </div>
-            <Button type="submit" className="rounded-xl px-6 h-[46px] shrink-0">
+            <Button type="submit" className="rounded-full px-6 h-[54px] shrink-0 shadow-md bg-primary hover:bg-primary-light transition-colors">
               Send
             </Button>
           </form>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

@@ -35,6 +35,8 @@
 
 .active {
   color: var(--primary);
+  background-color: rgba(0, 96, 100, 0.08); /* Light primary background */
+  border-radius: 12px;
 }
 
 .label {
