@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
@@ -98,7 +99,7 @@ export const Chat: React.FC = () => {
     processAIResponse(text);
   };
 
-import { FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
+
 
 // ... (keep interfaces and state logic same)
 
