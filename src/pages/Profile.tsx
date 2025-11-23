@@ -54,6 +54,14 @@ export const Profile: React.FC = () => {
         </div>
 
         <div className="border-t border-gray-100 pt-4 mt-4">
+          <h4 className="font-bold mb-2">Emergency Contacts</h4>
+          <p className="text-sm text-gray-500 mb-3">No emergency contacts added.</p>
+          <Button variant="outline" size="sm" className="w-full border-dashed">
+            + Add Contact
+          </Button>
+        </div>
+
+        <div className="border-t border-gray-100 pt-4 mt-4">
           <h4 className="font-bold mb-2">Data & Privacy</h4>
           <div className="flex flex-col gap-2">
             <Button variant="outline" size="sm">Export My Data</Button>
