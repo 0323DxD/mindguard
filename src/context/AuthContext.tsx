@@ -134,8 +134,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const startAnonymous = () => {
     setUser({
-      email: 'anonymous',
-      fullname: 'Anonymous',
+      email: 'guest',
+      fullname: 'Guest',
       studentid: '',
       program: '',
       passwordHash: '',

@@ -23,7 +23,7 @@ export const Landing: React.FC = () => {
 
         <div className={styles.actions}>
           <Button variant="primary" size="lg" onClick={handleAnonymous}>
-            Start Anonymously
+            Continue as Guest
           </Button>
 
           <div className={styles.divider}>
