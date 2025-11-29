@@ -83,11 +83,48 @@ export const Chat: React.FC = () => {
         "Thank you for sharing that with me. How does that make you feel?",
         "It's okay to feel this way. I'm here to listen."
       ];
+      const randomResponse = generic[Math.floor(Math.random() * generic.length)];
+      addMessage(randomResponse, 'ai');
+      setIsTyping(false);
+    }, 1500);
+  };
+
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+
+    const userText = inputValue.trim();
+    addMessage(userText, 'user');
+    setInputValue('');
+    
+    processAIResponse(userText);
+  };
+
+  return (
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* Header */}
+      <div className="bg-white px-4 py-3 shadow-sm flex items-center gap-3 z-10">
+        <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-primary">
+          <FaArrowLeft size={20} />
+        </button>
+        <div>
+          <h1 className="font-bold text-lg text-primary">MindGuard</h1>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+            <span className="text-xs text-gray-500">Online</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Chat Area */}
+      <div className="flex-1 overflow-hidden relative flex flex-col">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+          {messages.map((msg) => (
             <div
               key={msg.id}
               className={`max-w-[85%] p-4 rounded-2xl text-[15px] leading-relaxed break-words ${
                 msg.sender === 'user'
-                  ? 'bg-primary text-white self-end rounded-br-sm'
+                  ? 'bg-primary text-white self-end rounded-br-sm ml-auto'
                   : 'bg-white border border-gray-100 text-gray-800 self-start rounded-bl-sm shadow-sm'
               }`}
             >
