@@ -33,9 +33,15 @@ export interface MoodLog {
 
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'ai';
+  role: 'user' | 'ai' | 'system';
   content: string;
   timestamp: string;
+}
+
+export interface ChatResponse {
+  response: string;
+  sentiment: string;
+  action?: string;
 }
 
 export interface EmergencyContact {

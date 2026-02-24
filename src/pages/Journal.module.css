@@ -1,0 +1,353 @@
+.journalContainer {
+  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  min-height: calc(100vh - 70px);
+  padding-bottom: 90px;
+  background-color: #fafdfb; /* Very soft, almost white green tint */
+  font-family:
+    "Quicksand", "Nunito", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Softer, rounded fonts if available */
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(46, 139, 87, 0.1); /* Subtle green line */
+}
+
+.headerIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px; /* Rounder */
+  background: linear-gradient(
+    135deg,
+    #4da18b,
+    #338a71
+  ); /* Soft nature green gradient */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(77, 161, 139, 0.2);
+}
+
+.headerText h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  color: #2c3e38; /* Deep muted green/charcoal */
+}
+
+.headerText p {
+  margin: 0;
+  color: #5c756c;
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
+
+.newEntryBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.2rem;
+  background-color: #e8f4f0; /* Soft pastel green background */
+  border: 2px dashed #b5dbcc;
+  border-radius: 16px;
+  color: #2f7a62;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-bottom: 2rem;
+}
+
+.newEntryBtn:hover {
+  background-color: #dcf0e8;
+  border-color: #88c7af;
+  transform: translateY(-2px);
+}
+
+.saveFeedback {
+  background-color: #e6f6eb;
+  color: #2a6c42;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-weight: 500;
+  animation: slideDown 0.4s ease-out;
+  border: 1px solid #bce8cb;
+}
+
+.heartIcon {
+  color: #e57373; /* Soft warm pink */
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.editorCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+  margin-bottom: 2rem;
+  border: 1px solid #eef2f0;
+}
+
+.editorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.validationText {
+  color: #7b8f87;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.discardBtn {
+  background: #f5f7f6;
+  border: none;
+  color: #a0b3ac;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.discardBtn:hover {
+  background-color: #ffeaea;
+  color: #e06c6c;
+}
+
+.moodSelector {
+  margin-bottom: 1.5rem;
+}
+
+.moodLabel {
+  font-size: 0.95rem;
+  color: #5c756c;
+  margin: 0 0 0.8rem 0;
+  font-weight: 500;
+}
+
+.moodsList {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.moodBtn {
+  background: #f7faf9;
+  border: 1px solid #e2ece8;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moodBtn:hover {
+  transform: scale(1.1);
+  background-color: #ebf5f0;
+}
+
+.moodSelected {
+  background-color: #d3ebe0;
+  border-color: #8acfae;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(138, 207, 174, 0.3);
+}
+
+.textarea {
+  width: 100%;
+  border: 1px solid #e2ece8;
+  border-radius: 12px;
+  padding: 1.2rem;
+  font-size: 1.05rem;
+  font-family: inherit;
+  color: #2c3e38;
+  background-color: #fafdfb;
+  resize: vertical;
+  min-height: 160px;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.textarea::placeholder {
+  color: #a5b8b0;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #7bb59f;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(123, 181, 159, 0.15);
+}
+
+.editorActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.saveBtn {
+  padding: 0.7rem 2rem;
+  background-color: #57a389; /* Solid, comforting teal/green */
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(87, 163, 137, 0.2);
+}
+
+.saveBtn:hover:not(:disabled) {
+  background-color: #458770;
+  transform: translateY(-1px);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.entriesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.entryCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f0f4f2;
+}
+
+.entryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.entryMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.entryMood {
+  font-size: 1.5rem;
+}
+
+.entryDate {
+  font-size: 0.85rem;
+  color: #8b9e97;
+  font-weight: 500;
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: #e59393;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.deleteBtn:hover {
+  background-color: #fff0f0;
+  color: #d15656;
+}
+
+.entryText {
+  color: #3b4d46;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 1.05rem;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #7b8f87;
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 2px dashed #e8eeeadd;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  color: #cde0d7;
+  margin-bottom: 2rem;
+}
+
+.emptySub {
+  font-size: 0.95rem;
+  color: #9cb0a8;
+  margin-top: 0.5rem;
+}
+
+.crisisFooter {
+  text-align: center;
+  padding: 2rem 1rem;
+  border-top: 1px solid #e8eeeadd;
+  color: #8b9e97;
+  font-size: 0.9rem;
+}
+
+.crisisLink {
+  background: none;
+  border: none;
+  color: #648a7a;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+}
+
+.crisisLink:hover {
+  color: #3b4d46;
+}

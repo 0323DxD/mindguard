@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaHome, FaCommentDots, FaChartBar, FaUser } from 'react-icons/fa';
+import { FaHome, FaCommentDots, FaChartBar, FaUser, FaBook } from 'react-icons/fa';
 import styles from './Navbar.module.css';
 
 export const Navbar: React.FC = () => {
@@ -24,6 +24,13 @@ export const Navbar: React.FC = () => {
       >
         <FaCommentDots />
         <span className={styles.label}>Chat</span>
+      </button>
+      <button
+        className={`${styles.navBtn} ${isActive('/journal') ? styles.active : ''}`}
+        onClick={() => navigate('/journal')}
+      >
+        <FaBook />
+        <span className={styles.label}>Journal</span>
       </button>
       <button
         className={`${styles.navBtn} ${isActive('/wellness') ? styles.active : ''}`}

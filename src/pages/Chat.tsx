@@ -1,165 +1,147 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import { Card } from '../components/Card';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../components/Button';
-import { Input } from '../components/Input';
+import { Card } from '../components/Card';
+import { ChatMessage, ChatResponse } from '../types';
+import { ChatService } from '../services/chat';
+import { FaPaperPlane, FaRobot, FaExclamationTriangle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import styles from './Chat.module.css';
 
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
+// Initial greeting from the empathy bot
+const INITIAL_MESSAGE: ChatMessage = {
+  id: 'init',
+  role: 'ai',
+  content: "Hello. I'm MindGuard, your safe space. How are you feeling today?",
+  timestamp: new Date().toISOString()
+};
+
+const ThinkingIndicator = () => (
+  <div className={styles.thinking}>
+    <span>.</span><span>.</span><span>.</span>
+  </div>
+);
 
 export const Chat: React.FC = () => {
-  const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
+  const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    scrollToBottom();
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
   }, [messages, isTyping]);
 
-  // Initial greeting
-  useEffect(() => {
-    if (messages.length === 0) {
-      setIsTyping(true);
-      const timer = setTimeout(() => {
-        addMessage("Hello. I'm MindGuard. I'm here to listen without judgment. How are things going today?", 'ai');
-        setIsTyping(false);
-      }, 700);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+  const handleSend = async () => {
+    if (!input.trim()) return;
 
-  const addMessage = (text: string, sender: 'user' | 'ai') => {
-    const newMessage: Message = {
-      id: Date.now().toString() + Math.random().toString(),
-      text,
-      sender,
-      timestamp: new Date(),
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input,
+      timestamp: new Date().toISOString()
     };
-    setMessages((prev) => [...prev, newMessage]);
-  };
 
-  const processAIResponse = (text: string) => {
+    setMessages(prev => [...prev, userMsg]);
+    setInput('');
     setIsTyping(true);
-    
-    // Simple delay to simulate thinking
-    setTimeout(() => {
-      const lower = text.toLowerCase();
+
+    try {
+      // Call the Python backend via ChatService
+      const { response, action } = await ChatService.sendMessage(input, messages);
       
-      const crisisPatterns = [
-        /(?:kill(?:ing)?\s?myself|\bkill myself\b|\bsuicide\b|\bend it all\b|\bwant to die\b|\bi will die\b|\bi'm going to die\b|\bworthless\b|\bhurt myself\b)/i
-      ];
+      const aiMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'ai',
+        content: response,
+        timestamp: new Date().toISOString()
+      };
+      
+      setMessages(prev => [...prev, aiMsg]);
 
-      if (crisisPatterns.some(rx => rx.test(text))) {
-        addMessage("I'm listening. This sounds serious. Are you safe right now? If you are in immediate danger, please call local emergency services (911).", 'ai');
-        setIsTyping(false);
-        return;
+      // Handle Actions
+      if (action === 'crisis_resource') {
+        const crisisMsg: ChatMessage = {
+          id: (Date.now() + 2).toString(),
+          role: 'system',
+          content: "System Alert: If you are in immediate danger, please call 988 or 911 immediately.",
+          timestamp: new Date().toISOString()
+        };
+        setMessages(prev => [...prev, crisisMsg]);
+      } else if (action === 'breathing_promo' || action === 'gratitude') {
+         // Optionally handle other interactive triggers
       }
-
-      if (/\b(sad|depressed|unhappy|crying|lonely)\b/i.test(text)) {
-        addMessage("I'm sorry you're feeling sad. Would you like to tell me more about what's been happening?", 'ai');
-        setIsTyping(false);
-        return;
-      }
-
-      if (/\b(anxious|panic|scared|worried)\b/i.test(text)) {
-        addMessage("That sounds stressful. Do you want to try a short breathing exercise together?", 'ai');
-        setIsTyping(false);
-        return;
-      }
-
-      const generic = [
-        "I hear you. Tell me more about that.",
-        "Thank you for sharing that with me. How does that make you feel?",
-        "It's okay to feel this way. I'm here to listen."
-      ];
-      const randomResponse = generic[Math.floor(Math.random() * generic.length)];
-      addMessage(randomResponse, 'ai');
+    } catch (error) {
+      console.error('Failed to get response', error);
+      const errorMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'ai',
+        content: "I'm having trouble connecting right now. Please try again later.",
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
-  };
-
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
-
-    const userText = inputValue.trim();
-    addMessage(userText, 'user');
-    setInputValue('');
-    
-    processAIResponse(userText);
+    }
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <div className="bg-white px-4 py-3 shadow-sm flex items-center gap-3 z-10">
-        <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-primary">
-          <FaArrowLeft size={20} />
-        </button>
-        <div>
-          <h1 className="font-bold text-lg text-primary">MindGuard</h1>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-green-500"></span>
-            <span className="text-xs text-gray-500">Online</span>
-          </div>
-        </div>
-      </div>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h3>Empathy Companion</h3>
+        <p className={styles.subtitle}>Powered by Python AI</p>
+      </header>
 
-      {/* Chat Area */}
-      <div className="flex-1 overflow-hidden relative flex flex-col">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+      <Card className={styles.chatArea} padding={false}>
+        <div className={styles.messages} ref={scrollRef}>
           {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`max-w-[85%] p-4 rounded-2xl text-[15px] leading-relaxed break-words ${
-                msg.sender === 'user'
-                  ? 'bg-primary text-white self-end rounded-br-sm ml-auto'
-                  : 'bg-white border border-gray-100 text-gray-800 self-start rounded-bl-sm shadow-sm'
-              }`}
-            >
-              {msg.text}
+            <div key={msg.id} className={`${styles.message} ${msg.role === 'user' ? styles.user : (msg.role === 'system' ? styles.system : styles.ai)}`}>
+              {msg.role === 'ai' && <div className={styles.avatar}><FaRobot /></div>}
+              {msg.role === 'system' && <div className={styles.avatar}><FaExclamationTriangle color="red"/></div>}
+              <div className={styles.bubble}>
+                {msg.content}
+                {msg.role === 'ai' && msg.content.includes("breathing") && (
+                   <div style={{marginTop: '8px'}}>
+                     <Button size="sm" variant="outline" onClick={() => navigate('/wellness')}>Go to Breathing Exercise</Button>
+                   </div>
+                )}
+              </div>
             </div>
           ))}
           {isTyping && (
-            <div className="text-sm text-gray-400 italic p-2 self-start animate-pulse">
-              MindGuard is typing...
-            </div>
+             <div className={`${styles.message} ${styles.ai}`}>
+               <div className={styles.avatar}><FaRobot /></div>
+               <div className={styles.bubble}><ThinkingIndicator /></div>
+             </div>
           )}
-          <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100">
-          <form onSubmit={handleSend} className="flex gap-3 items-center">
-            <div className="flex-1">
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Type here..."
-                className="w-full rounded-full border-gray-200 focus:border-primary bg-transparent"
-                style={{ marginBottom: 0, fontSize: '15px' }} 
-              />
-            </div>
-            <button 
-              type="submit" 
-              className="w-12 h-12 flex items-center justify-center bg-primary text-white rounded-xl shadow-md hover:bg-primary-light transition-colors shrink-0"
-            >
-              <FaPaperPlane size={18} className="-ml-1" /> {/* Slight offset for visual center */}
-            </button>
-          </form>
+        <div className={styles.inputArea}>
+          <input
+            type="text"
+            className={styles.input}
+            placeholder="Type your message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            disabled={isTyping}
+          />
+          <Button 
+            className={styles.sendBtn} 
+            onClick={handleSend} 
+            disabled={!input.trim() || isTyping}
+          >
+            <FaPaperPlane />
+          </Button>
         </div>
-      </div>
+      </Card>
+      
+      <p className={styles.disclaimer}>
+        MindGuard is an AI companion, not a replacement for professional help.
+        <br />If you are in crisis, please contact emergency services.
+      </p>
     </div>
   );
 };

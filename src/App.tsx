@@ -15,6 +15,7 @@ import { Wellness } from './pages/Wellness';
 import { Profile } from './pages/Profile';
 import { Groups } from './pages/Groups';
 import { Booking } from './pages/Booking';
+import { Journal } from './pages/Journal';
 
 function App() {
   return (
@@ -53,6 +54,13 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <Groups />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/journal" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Journal />
                   </Layout>
                 </ProtectedRoute>
               } />
