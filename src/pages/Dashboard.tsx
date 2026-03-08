@@ -26,7 +26,21 @@ export const Dashboard: React.FC = () => {
       <Card title="How are you feeling?" className={styles.moodCard}>
         <div className={styles.moodGrid}>
           {['Great', 'Good', 'Okay', 'Down', 'Crisis'].map((mood) => (
-            <button key={mood} className={styles.moodBtn}>
+            <button 
+              key={mood} 
+              className={styles.moodBtn}
+              onClick={() => {
+                const moods = JSON.parse(localStorage.getItem('mood_history') || '[]');
+                const newMood = {
+                  id: Date.now().toString(),
+                  mood,
+                  timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('mood_history', JSON.stringify([...moods, newMood]));
+                // Simple feedback or jump to affirmations? The user didn't specify, so just log.
+                alert(`Mood logged: ${mood}! Check your Affirmations.`);
+              }}
+            >
               <span className={styles.moodEmoji}>
                 {mood === 'Great' ? '😄' : mood === 'Good' ? '🙂' : mood === 'Okay' ? '😐' : mood === 'Down' ? '😔' : '😫'}
               </span>
