@@ -24,6 +24,8 @@ import { Profile } from './pages/Profile';
 import { Groups } from './pages/Groups';
 import { Booking } from './pages/Booking';
 import { Journal } from './pages/Journal';
+import { ResourceLibrary } from './pages/ResourceLibrary';
+import { Emergency } from './pages/Emergency';
 
 function App() {
   return (
@@ -84,6 +86,20 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <Profile />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/resources" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ResourceLibrary />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/emergency" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Emergency />
                   </Layout>
                 </ProtectedRoute>
               } />

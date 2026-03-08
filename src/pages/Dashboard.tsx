@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { FaRobot, FaWind, FaUsers, FaCalendarCheck } from 'react-icons/fa';
+import { FaRobot, FaWind, FaUsers, FaCalendarCheck, FaBook } from 'react-icons/fa';
 import styles from './Dashboard.module.css';
 
 export const Dashboard: React.FC = () => {
@@ -57,6 +57,12 @@ export const Dashboard: React.FC = () => {
           </button>
         </Card>
         <Card className={styles.actionCard} padding={false}>
+          <button className={styles.actionBtn} onClick={() => navigate('/resources')}>
+            <FaBook className={styles.actionIcon} />
+            <span>Library</span>
+          </button>
+        </Card>
+        <Card className={styles.actionCard} padding={false}>
           <button className={styles.actionBtn} onClick={() => navigate('/booking')}>
             <FaCalendarCheck className={styles.actionIcon} />
             <span>Counselor</span>
@@ -67,7 +73,7 @@ export const Dashboard: React.FC = () => {
       <Card className={styles.emergencyCard}>
         <strong className={styles.emergencyTitle}>Need immediate help?</strong>
         <p className={styles.emergencyText}>LSPU Safety & Security is available 24/7.</p>
-        <Button variant="alert" size="sm" className="w-full">Call Emergency</Button>
+        <Button variant="alert" size="sm" className="w-full" onClick={() => navigate('/emergency')}>Call Emergency</Button>
       </Card>
     </div>
   );

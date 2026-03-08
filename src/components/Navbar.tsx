@@ -40,6 +40,13 @@ export const Navbar: React.FC = () => {
         <span className={styles.label}>Wellness</span>
       </button>
       <button
+        className={`${styles.navBtn} ${isActive('/resources') ? styles.active : ''}`}
+        onClick={() => navigate('/resources')}
+      >
+        <FaBook />
+        <span className={styles.label}>Resources</span>
+      </button>
+      <button
         className={`${styles.navBtn} ${isActive('/profile') ? styles.active : ''}`}
         onClick={() => navigate('/profile')}
       >
