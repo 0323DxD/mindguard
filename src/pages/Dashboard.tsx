@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { FaRobot, FaWind, FaUsers, FaCalendarCheck, FaBook } from 'react-icons/fa';
+import { FaRobot, FaWind, FaUsers, FaCalendarCheck, FaBook, FaLightbulb } from 'react-icons/fa';
 import styles from './Dashboard.module.css';
 
 export const Dashboard: React.FC = () => {
@@ -68,6 +68,12 @@ export const Dashboard: React.FC = () => {
             <span>Counselor</span>
           </button>
         </Card>
+        <Card className={styles.actionCard} padding={false}>
+          <button className={styles.actionBtn} onClick={() => navigate('/affirmations')}>
+            <FaLightbulb className={styles.actionIcon} />
+            <span>Affirmations</span>
+          </button>
+        </Card>
       </div>
 
       <Card className={styles.emergencyCard}>
@@ -75,6 +81,10 @@ export const Dashboard: React.FC = () => {
         <p className={styles.emergencyText}>LSPU Safety & Security is available 24/7.</p>
         <Button variant="alert" size="sm" className="w-full" onClick={() => navigate('/emergency')}>Call Emergency</Button>
       </Card>
+
+      <div className={styles.securityNotice}>
+        <span>🔒</span> All data is encrypted and protected for your privacy.
+      </div>
     </div>
   );
 };

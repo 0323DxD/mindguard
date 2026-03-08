@@ -26,6 +26,7 @@ import { Booking } from './pages/Booking';
 import { Journal } from './pages/Journal';
 import { ResourceLibrary } from './pages/ResourceLibrary';
 import { Emergency } from './pages/Emergency';
+import { Affirmations } from './pages/Affirmations';
 
 function App() {
   return (
@@ -100,6 +101,13 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <Emergency />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/affirmations" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Affirmations />
                   </Layout>
                 </ProtectedRoute>
               } />
