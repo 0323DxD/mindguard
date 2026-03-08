@@ -4,10 +4,18 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoute } from './components/AdminRoute';
 import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
+import { ForgotPassword } from './pages/ForgotPassword';
 import { Dashboard } from './pages/Dashboard';
+import { AdminLayout } from './pages/admin/layout/AdminLayout';
+import AdminHome from './pages/admin/AdminHome';
+import MoodAnalytics from './pages/admin/MoodAnalytics';
+import RiskMonitoring from './pages/admin/RiskMonitoring';
+import StudentOverview from './pages/admin/StudentOverview';
+import ManageUsers from './pages/admin/ManageUsers';
 
 // Placeholder components for routes not yet implemented
 import { Chat } from './pages/Chat';
@@ -27,6 +35,7 @@ function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               
               {/* Protected Routes */}
               <Route path="/dashboard" element={
@@ -79,6 +88,15 @@ function App() {
                 </ProtectedRoute>
               } />
               
+              <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<AdminHome />} />
+                <Route path="mood-analytics" element={<MoodAnalytics />} />
+                <Route path="risk-monitoring" element={<RiskMonitoring />} />
+                <Route path="student-overview" element={<StudentOverview />} />
+                <Route path="manage-users" element={<ManageUsers />} />
+              </Route>
+
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>

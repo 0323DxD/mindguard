@@ -8,8 +8,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   encryptionKey: CryptoKey | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (user: Omit<User, 'passwordHash' | 'createdAt'>, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  signup: (user: Omit<User, 'passwordHash' | 'createdAt'>, password: string) => Promise<User>;
   logout: () => void;
   startAnonymous: () => void;
 }
@@ -31,13 +31,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const initAuth = async () => {
     setIsLoading(true);
     try {
+      // Try to restore session from localStorage (set during login)
       const session = StorageService.get<Session | null>(StorageService.KEYS.SESSION, null);
-      if (session && session.email) {
-        const users = StorageService.get<User[]>(StorageService.KEYS.USERS, []);
-        const foundUser = users.find((u) => u.email === session.email);
+      if (session && session.email && !session.anon) {
+        const cachedUsers = StorageService.get<User[]>(StorageService.KEYS.USERS, []);
+        const foundUser = cachedUsers.find((u) => u.email === session.email);
         if (foundUser) {
           setUser(foundUser);
-          // Try to restore key from sessionStorage
           const savedKeyJson = sessionStorage.getItem(SESSION_KEY_STORAGE);
           if (savedKeyJson) {
             const keyData = JSON.parse(savedKeyJson);
@@ -52,7 +52,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
         }
       } else if (session && session.anon) {
-        // Anonymous session
         setUser({
           email: 'anonymous',
           fullname: 'Anonymous',
@@ -74,41 +73,81 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     sessionStorage.setItem(SESSION_KEY_STORAGE, JSON.stringify(exported));
   };
 
-  const login = async (email: string, password: string) => {
-    const users = StorageService.get<User[]>(StorageService.KEYS.USERS, []);
-    const foundUser = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+  const login = async (email: string, password: string): Promise<User> => {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || 'Invalid email or password');
+    }
+    
+    const data = await res.json();
+    const raw = data.user;
 
-    if (!foundUser) throw new Error('User not found');
+    // Map backend snake_case fields → frontend camelCase User type
+    const foundUser: User = {
+      id: raw.id,
+      email: raw.email,
+      fullname: raw.fullname || '',
+      studentid: raw.student_id || '',
+      program: raw.program || '',
+      passwordHash: '',  // Never stored in frontend
+      createdAt: new Date().toISOString(),
+      role: raw.role || 'student',
+      is_primary_admin: raw.is_primary_admin || false,
+      trusted_contacts: raw.trusted_contacts || [],
+    };
 
-    const hash = await EncryptionService.hashPassword(password);
-    if (hash !== foundUser.passwordHash) throw new Error('Invalid credentials');
-
-    // Derive key
+    // Derive encryption key
     const key = await EncryptionService.deriveKey(password);
     setEncryptionKey(key);
     await saveKeyToSession(key);
 
     setUser(foundUser);
+    
+    // Cache for refresh persistence
+    const users = StorageService.get<User[]>(StorageService.KEYS.USERS, []);
+    const existingIdx = users.findIndex(u => u.email === foundUser.email);
+    if (existingIdx >= 0) users[existingIdx] = foundUser;
+    else users.push(foundUser);
+    StorageService.set(StorageService.KEYS.USERS, users);
+
     StorageService.set(StorageService.KEYS.SESSION, {
       email: foundUser.email,
       anon: false,
       createdAt: new Date().toISOString(),
     });
+
+    return foundUser;
   };
 
-  const signup = async (userData: Omit<User, 'passwordHash' | 'createdAt'>, password: string) => {
-    const users = StorageService.get<User[]>(StorageService.KEYS.USERS, []);
-    if (users.some((u) => u.email.toLowerCase() === userData.email.toLowerCase())) {
-      throw new Error('Email already exists');
+  const signup = async (userData: Omit<User, 'passwordHash' | 'createdAt'>, password: string): Promise<User> => {
+    const res = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        fullname: userData.fullname, 
+        email: userData.email, 
+        student_id: userData.studentid, 
+        program: userData.program, 
+        password 
+      })
+    });
+    
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Email already exists or signup failed');
     }
+    
+    const data = await res.json();
+    const newUser: User = data.user;
 
-    const passwordHash = await EncryptionService.hashPassword(password);
-    const newUser: User = {
-      ...userData,
-      passwordHash,
-      createdAt: new Date().toISOString(),
-    };
-
+    // Cache to local storage
+    const users = StorageService.get<User[]>(StorageService.KEYS.USERS, []);
     users.push(newUser);
     StorageService.set(StorageService.KEYS.USERS, users);
 
@@ -123,6 +162,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       anon: false,
       createdAt: new Date().toISOString(),
     });
+
+    return newUser;
   };
 
   const logout = () => {

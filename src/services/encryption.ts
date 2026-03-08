@@ -25,7 +25,7 @@ export const EncryptionService = {
       },
       keyMaterial,
       { name: ALGO_KEY, length: 256 },
-      false, // Key is not extractable
+      true, // Key MUST be extractable so AuthContext can save it to sessionStorage
       ['encrypt', 'decrypt']
     );
   },

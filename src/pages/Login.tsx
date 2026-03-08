@@ -12,6 +12,7 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth(); // Need user state to check role after login
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,8 +20,13 @@ export const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      navigate('/dashboard');
+      const loggedInUser = await login(email, password);
+      
+      if (loggedInUser.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to login');
     } finally {
@@ -56,7 +62,17 @@ export const Login: React.FC = () => {
 
           {error && <div className={styles.error}>{error}</div>}
 
-          <Button type="submit" variant="primary" size="lg" isLoading={isLoading} className="w-full mt-4">
+
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "0.5rem", marginBottom: "1rem" }}>
+            <span 
+              onClick={() => navigate('/forgot-password')} 
+              style={{ fontSize: "0.875rem", color: "#0f766e", cursor: "pointer", fontWeight: 500 }}
+            >
+              Forgot Password?
+            </span>
+          </div>
+
+          <Button type="submit" variant="primary" size="lg" isLoading={isLoading} className="w-full">
             Log In
           </Button>
         </form>

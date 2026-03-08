@@ -1,0 +1,9 @@
+{"timestamp": "2026-03-03T13:18:27.708513", "text_hash": 6757788349413511418, "predicted_intent": "academic_stress", "confidence": 0.189, "intensity": "low"}
+{"timestamp": "2026-03-04T14:22:35.296271", "text_hash": -5146140204102018500, "predicted_intent": "academic_stress", "confidence": 0.355, "intensity": "low"}
+{"timestamp": "2026-03-04T14:22:37.338905", "text_hash": -5146140204102018500, "predicted_intent": "general_chat", "confidence": 0.218, "intensity": "low"}
+{"timestamp": "2026-03-04T14:59:26.188987", "text_hash": -5146140204102018500, "predicted_intent": "academic_stress", "confidence": 0.178, "intensity": "low"}
+{"timestamp": "2026-03-04T14:59:26.454080", "text_hash": -5146140204102018500, "predicted_intent": "burnout", "confidence": 0.222, "intensity": "low"}
+{"timestamp": "2026-03-05T10:24:33.764840", "text_hash": -6348340940422382320, "predicted_intent": "academic_stress", "confidence": 0.178, "intensity": "low"}
+{"timestamp": "2026-03-05T10:24:34.057374", "text_hash": -6348340940422382320, "predicted_intent": "burnout", "confidence": 0.222, "intensity": "low"}
+{"timestamp": "2026-03-05T10:36:08.133886", "text_hash": -506492656253027456, "predicted_intent": "academic_stress", "confidence": 0.178, "intensity": "low"}
+{"timestamp": "2026-03-05T10:36:08.447946", "text_hash": -506492656253027456, "predicted_intent": "burnout", "confidence": 0.222, "intensity": "low"}

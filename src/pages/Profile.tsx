@@ -1,148 +1,277 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
+import { Input } from '../components/Input';
 import { useAuth } from '../context/AuthContext';
 
 export const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   
-  // Trusted Contacts State
-  const [contacts, setContacts] = React.useState<{id: string, name: string, phone: string}[]>([]);
-  const [isAdding, setIsAdding] = React.useState(false);
-  const [newContact, setNewContact] = React.useState({ name: '', phone: '' });
+  // Editing modes
+  const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Load contacts from local storage on mount
-  React.useEffect(() => {
-    const saved = localStorage.getItem('trusted_contacts');
-    if (saved) {
-      setContacts(JSON.parse(saved));
+  // Form states
+  const [editForm, setEditForm] = useState({
+    fullname: user?.fullname || '',
+    email: user?.email || '',
+  });
+
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
+  });
+
+  // Contacts
+  const [contacts, setContacts] = useState<string[]>(user?.trusted_contacts || []);
+  const [newContact, setNewContact] = useState('');
+  const [isAddingContact, setIsAddingContact] = useState(false);
+
+  // Status messages
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setEditForm({ fullname: user.fullname, email: user.email });
+      setContacts(user.trusted_contacts || []);
     }
-  }, []);
-
-  // Save contacts to local storage whenever they change
-  React.useEffect(() => {
-    localStorage.setItem('trusted_contacts', JSON.stringify(contacts));
-  }, [contacts]);
-
-  const handleAddContact = () => {
-    if (!newContact.name || !newContact.phone) return;
-    setContacts([...contacts, { id: Date.now().toString(), ...newContact }]);
-    setNewContact({ name: '', phone: '' });
-    setIsAdding(false);
-  };
-
-  const handleDeleteContact = (id: string) => {
-    setContacts(contacts.filter(c => c.id !== id));
-  };
-
-  // Mock user data matching the prototype
-  const user = {
-    fullname: 'Student User',
-    email: 'email@lspu.edu.ph',
-    studentid: '-',
-    program: '-'
-  };
+  }, [user]);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const handleSaveProfile = async () => {
+    setError('');
+    setMessage('');
+    if (!user?.id) return;
+
+    if (!editForm.fullname || !editForm.email) {
+      setError('Name and Email are required.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const payload = {
+        fullname: editForm.fullname,
+        email: editForm.email,
+        trusted_contacts: contacts
+      };
+      
+      const res = await fetch(`/api/profile/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Update failed');
+      
+      setMessage('Profile successfully updated.');
+      setIsEditing(false);
+      
+      // Update local cache so refresh works properly
+      const storedUsers = JSON.parse(localStorage.getItem('mindguard_users_v2') || '[]');
+      const userIndex = storedUsers.findIndex((u: any) => u.email === user.email);
+      if (userIndex >= 0) {
+        storedUsers[userIndex] = { ...storedUsers[userIndex], ...payload };
+        localStorage.setItem('mindguard_users_v2', JSON.stringify(storedUsers));
+        // Simple trick to force context reload without prop drilling
+        window.location.reload(); 
+      }
+      
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSavePassword = async () => {
+    setError('');
+    setMessage('');
+    if (!user?.id) return;
+
+    if (passwordForm.new_password !== passwordForm.confirm_password) {
+      setError('New passwords do not match.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/profile/password/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          current_password: passwordForm.current_password,
+          new_password: passwordForm.new_password
+        })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Password update failed');
+      
+      setMessage('Password successfully updated.');
+      setIsChangingPassword(false);
+      setPasswordForm({ current_password: '', new_password: '', confirm_password: '' });
+      
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addContact = () => {
+    if (!newContact.trim() || contacts.length >= 3) return;
+    setContacts([...contacts, newContact.trim()]);
+    setNewContact('');
+    setIsAddingContact(false);
+  };
+
+  if (!user) return null;
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 max-w-2xl mx-auto">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
-          ←
+        <Button variant="ghost" size="sm" onClick={() => navigate(user.role === 'admin' ? '/admin/dashboard' : '/dashboard')}>
+          ← Back to Dashboard
         </Button>
-        <h3 className="text-xl font-bold text-primary m-0">My Profile</h3>
       </div>
 
       <Card>
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <strong className="block text-lg">{user.fullname}</strong>
-            <div className="text-sm text-gray-500">{user.email}</div>
-          </div>
-          <div className="flex gap-2">
-             <Button variant="outline" size="sm">Edit</Button>
-             <Button variant="primary" size="sm" className="bg-red-600 hover:bg-red-700 border-red-600" onClick={handleLogout}>Logout</Button>
-          </div>
-        </div>
+        {/* Notifications */}
+        {message && <div className="mb-4 bg-teal-50 border-l-4 border-teal-500 p-4 text-teal-700 font-medium text-sm">{message}</div>}
+        {error && <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-4 text-red-700 font-medium text-sm">{error}</div>}
 
-        <div className="border-t border-gray-100 pt-4 mt-2 space-y-3">
-          <div className="flex items-center gap-4">
-            <div className="w-24 text-gray-500 text-sm">Student ID</div>
-            <div>{user.studentid}</div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="w-24 text-gray-500 text-sm">Program</div>
-            <div>{user.program}</div>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-100 pt-4 mt-4">
-          <h4 className="font-bold mb-2">Emergency Contacts</h4>
-          
-          {contacts.length === 0 && !isAdding && (
-            <p className="text-sm text-gray-500 mb-3">No emergency contacts added.</p>
-          )}
-
-          <div className="space-y-2 mb-3">
-            {contacts.map(contact => (
-              <div key={contact.id} className="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
-                <div>
-                  <div className="font-medium text-sm">{contact.name}</div>
-                  <div className="text-xs text-gray-500">{contact.phone}</div>
-                </div>
-                <button 
-                  onClick={() => handleDeleteContact(contact.id)}
-                  className="text-red-500 hover:text-red-700 text-xs px-2"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {isAdding ? (
-            <div className="bg-gray-50 p-3 rounded-xl space-y-2 border border-gray-200">
-              <input 
-                placeholder="Contact Name" 
-                className="w-full p-2 text-sm border rounded-lg"
-                value={newContact.name}
-                onChange={e => setNewContact({...newContact, name: e.target.value})}
-              />
-              <input 
-                placeholder="Phone Number" 
-                className="w-full p-2 text-sm border rounded-lg"
-                value={newContact.phone}
-                onChange={e => setNewContact({...newContact, phone: e.target.value})}
-              />
-              <div className="flex gap-2 mt-2">
-                <Button size="sm" onClick={handleAddContact} className="flex-1">Save</Button>
-                <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)} className="flex-1">Cancel</Button>
-              </div>
-            </div>
-          ) : (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full border-dashed"
-              onClick={() => setIsAdding(true)}
-            >
-              + Add Contact
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 m-0">My Profile</h2>
+          {!isEditing && (
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              Edit Profile
             </Button>
           )}
         </div>
 
-        <div className="border-t border-gray-100 pt-4 mt-4">
-          <h4 className="font-bold mb-2">Data & Privacy</h4>
-          <div className="flex flex-col gap-2">
-            <Button variant="outline" size="sm">Export My Data</Button>
-            <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50">Delete Account</Button>
+        {/* Basic Info Mode: View vs Edit */}
+        {isEditing ? (
+          <div className="space-y-4 mb-6">
+            <Input 
+              label="Full Name *" 
+              value={editForm.fullname} 
+              onChange={(e) => setEditForm({...editForm, fullname: e.target.value})} 
+              fullWidth 
+            />
+            <Input 
+              label="Email Address *" 
+              type="email"
+              value={editForm.email} 
+              onChange={(e) => setEditForm({...editForm, email: e.target.value})} 
+              fullWidth 
+            />
+            <div className="flex gap-2 pt-2">
+              <Button onClick={handleSaveProfile} isLoading={isLoading}>Save Changes</Button>
+              <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
+            </div>
           </div>
+        ) : (
+          <div className="mb-6 space-y-1">
+            <div className="text-xl font-bold text-gray-900">{user.fullname}</div>
+            <div className="text-gray-500">{user.email}</div>
+          </div>
+        )}
+
+        {/* Read Only Fields */}
+        <div className="bg-gray-50 p-4 rounded-lg space-y-3 mb-8">
+          <div className="flex justify-between items-center border-b border-gray-200 pb-2">
+            <span className="text-sm font-medium text-gray-500">Student ID</span>
+            <span className="font-medium text-gray-900">{user.studentid || '-'}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium text-gray-500">Course</span>
+            <span className="font-medium text-gray-900 text-right max-w-[60%] truncate" title={user.program}>{user.program || '-'}</span>
+          </div>
+        </div>
+
+        {/* Passwords */}
+        <div className="border-t border-gray-100 pt-6 mb-8">
+           <h3 className="text-lg font-bold text-gray-800 mb-4">Security</h3>
+           {isChangingPassword ? (
+             <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+                <Input label="Current Password" type="password" value={passwordForm.current_password} onChange={e => setPasswordForm({...passwordForm, current_password: e.target.value})} fullWidth />
+                <Input label="New Password" type="password" value={passwordForm.new_password} onChange={e => setPasswordForm({...passwordForm, new_password: e.target.value})} fullWidth />
+                <Input label="Confirm New Password" type="password" value={passwordForm.confirm_password} onChange={e => setPasswordForm({...passwordForm, confirm_password: e.target.value})} fullWidth />
+                <div className="flex gap-2 pt-2">
+                  <Button onClick={handleSavePassword} isLoading={isLoading}>Update Password</Button>
+                  <Button variant="ghost" onClick={() => setIsChangingPassword(false)}>Cancel</Button>
+                </div>
+             </div>
+           ) : (
+             <Button variant="outline" size="sm" onClick={() => setIsChangingPassword(true)}>
+               Change Password
+             </Button>
+           )}
+        </div>
+
+        {/* Trusted Contacts */}
+        <div className="border-t border-gray-100 pt-6 mb-8">
+          <h3 className="text-lg font-bold text-gray-800 mb-1">Trusted Contacts</h3>
+          <p className="text-sm text-gray-500 mb-4">Up to 3 emergency numbers to contact.</p>
+          
+          <div className="space-y-3 mb-4">
+            {contacts.map((contact, idx) => (
+              <div key={idx} className="flex justify-between items-center bg-teal-50 px-4 py-3 rounded-lg border border-teal-100">
+                <span className="font-medium text-teal-900">{contact}</span>
+                {isEditing && (
+                  <button 
+                    onClick={() => setContacts(contacts.filter((_, i) => i !== idx))}
+                    className="text-red-500 text-sm font-bold hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
+            {contacts.length === 0 && <p className="text-sm text-gray-400 italic">No contacts added yet.</p>}
+          </div>
+
+          {isEditing && contacts.length < 3 && (
+            isAddingContact ? (
+              <div className="flex gap-2">
+                <Input placeholder="Enter Phone Number..." value={newContact} onChange={e => setNewContact(e.target.value)} fullWidth />
+                <Button onClick={addContact}>Add</Button>
+                <Button variant="ghost" onClick={() => setIsAddingContact(false)}>Cancel</Button>
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" className="border-dashed" onClick={() => setIsAddingContact(true)}>
+                + Add Trusted Contact
+              </Button>
+            )
+          )}
+        </div>
+
+        {/* Privacy Note */}
+        <div className="flex items-center justify-center gap-2 text-xs text-gray-400 font-medium py-4 px-2 bg-gray-50 rounded mb-8">
+          <span className="text-lg">🔒</span> All data is encrypted and protected for your privacy.
+        </div>
+
+        {/* Global Actions */}
+        <div className="border-t border-gray-100 pt-6">
+          <Button 
+            variant="primary" 
+            size="lg" 
+            className="w-full bg-red-600 hover:bg-red-700 border-red-600" 
+            onClick={handleLogout}
+          >
+            Log Out of MindGuard
+          </Button>
         </div>
       </Card>
     </div>

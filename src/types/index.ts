@@ -1,10 +1,14 @@
 export interface User {
+  id?: number;
   email: string;
   fullname: string;
   studentid: string;
   program: string;
-  passwordHash: string; // SHA-256 hash of the password
-  createdAt: string;
+  passwordHash?: string; // Optional since it comes from backend
+  createdAt?: string;
+  role?: string; // "student" or "admin"
+  is_primary_admin?: boolean;
+  trusted_contacts?: string[];
   // Encrypted fields (optional, if we decide to encrypt profile data too)
   emergencyContacts?: EncryptedData; 
 }

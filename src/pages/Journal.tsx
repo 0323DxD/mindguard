@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaBook, FaTrash, FaPlus, FaTimes, FaHeart } from 'react-icons/fa';
+import { AnimatedItem } from '../components/AnimatedItem';
 import styles from './Journal.module.css';
 
 interface JournalEntry {
@@ -172,26 +173,28 @@ export const Journal: React.FC = () => {
           </div>
         ) : (
           entries.map(entry => (
-            <div key={entry.id} className={styles.entryCard}>
-              <div className={styles.entryHeader}>
-                <div className={styles.entryMeta}>
-                  {entry.mood && <span className={styles.entryMood}>{entry.mood}</span>}
-                  <span className={styles.entryDate}>{entry.date}</span>
+            <AnimatedItem key={entry.id}>
+              <div className={styles.entryCard}>
+                <div className={styles.entryHeader}>
+                  <div className={styles.entryMeta}>
+                    {entry.mood && <span className={styles.entryMood}>{entry.mood}</span>}
+                    <span className={styles.entryDate}>{entry.date}</span>
+                  </div>
+                  <button 
+                    className={styles.deleteBtn}
+                    onClick={() => handleDelete(entry.id)}
+                    title="Delete Entry"
+                  >
+                    <FaTrash />
+                  </button>
                 </div>
-                <button 
-                  className={styles.deleteBtn}
-                  onClick={() => handleDelete(entry.id)}
-                  title="Delete Entry"
-                >
-                  <FaTrash />
-                </button>
+                {entry.text && (
+                  <div className={styles.entryText}>
+                    {entry.text}
+                  </div>
+                )}
               </div>
-              {entry.text && (
-                <div className={styles.entryText}>
-                  {entry.text}
-                </div>
-              )}
-            </div>
+            </AnimatedItem>
           ))
         )}
       </div>

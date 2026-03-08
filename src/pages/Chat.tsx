@@ -5,6 +5,7 @@ import { ChatMessage, ChatResponse } from '../types';
 import { ChatService } from '../services/chat';
 import { FaPaperPlane, FaRobot, FaExclamationTriangle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { AnimatedItem } from '../components/AnimatedItem';
 import styles from './Chat.module.css';
 
 // Initial greeting from the empathy bot
@@ -97,18 +98,20 @@ export const Chat: React.FC = () => {
       <Card className={styles.chatArea} padding={false}>
         <div className={styles.messages} ref={scrollRef}>
           {messages.map((msg) => (
-            <div key={msg.id} className={`${styles.message} ${msg.role === 'user' ? styles.user : (msg.role === 'system' ? styles.system : styles.ai)}`}>
-              {msg.role === 'ai' && <div className={styles.avatar}><FaRobot /></div>}
-              {msg.role === 'system' && <div className={styles.avatar}><FaExclamationTriangle color="red"/></div>}
-              <div className={styles.bubble}>
-                {msg.content}
-                {msg.role === 'ai' && msg.content.includes("breathing") && (
-                   <div style={{marginTop: '8px'}}>
-                     <Button size="sm" variant="outline" onClick={() => navigate('/wellness')}>Go to Breathing Exercise</Button>
-                   </div>
-                )}
+            <AnimatedItem key={msg.id} delay={0.1}>
+              <div className={`${styles.message} ${msg.role === 'user' ? styles.user : (msg.role === 'system' ? styles.system : styles.ai)}`}>
+                {msg.role === 'ai' && <div className={styles.avatar}><FaRobot /></div>}
+                {msg.role === 'system' && <div className={styles.avatar}><FaExclamationTriangle color="red"/></div>}
+                <div className={styles.bubble}>
+                  {msg.content}
+                  {msg.role === 'ai' && msg.content.includes("breathing") && (
+                     <div style={{marginTop: '8px'}}>
+                       <Button size="sm" variant="outline" onClick={() => navigate('/wellness')}>Go to Breathing Exercise</Button>
+                     </div>
+                  )}
+                </div>
               </div>
-            </div>
+            </AnimatedItem>
           ))}
           {isTyping && (
              <div className={`${styles.message} ${styles.ai}`}>
