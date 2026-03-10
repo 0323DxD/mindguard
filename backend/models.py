@@ -73,3 +73,14 @@ class AdminAuditLog(Base):
     action_type = Column(String(100))
     target_email = Column(String(255), index=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+
+class SavedAffirmation(Base):
+    __tablename__ = "saved_affirmations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    text = Column(String(500), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")

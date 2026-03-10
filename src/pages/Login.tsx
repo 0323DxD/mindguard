@@ -23,7 +23,9 @@ export const Login: React.FC = () => {
       const loggedInUser = await login(email, password);
       
       if (loggedInUser.role === 'admin') {
-        navigate('/admin/dashboard');
+        navigate('/superadmin/dashboard');
+      } else if (loggedInUser.role === 'staff') {
+        navigate('/staff/dashboard');
       } else {
         navigate('/dashboard');
       }

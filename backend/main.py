@@ -116,6 +116,21 @@ class LoginRequest(BaseModel): # Added LoginRequest
 
     reasoning: Optional[Dict] = None
 
+class CreateStaffRequest(BaseModel):
+    fullname: str
+    email: str
+    role: str  # "Guidance Office" or "Ka-PEER Yu"
+    password: str
+    confirm_password: Optional[str] = None
+
+class UpdateStaffRequest(BaseModel):
+    fullname: str
+    email: str
+    role: str
+
+class SaveAffirmationRequest(BaseModel):
+    text: str
+
 # =============================================================================
 # STEP 1 — TEXT NORMALIZER
 # =============================================================================
@@ -1114,6 +1129,150 @@ def get_admin_alerts(db: Session = Depends(get_db)):
             "is_reviewed": a.is_reviewed
         })
     return out
+
+
+# =============================================================================
+# STAFF MANAGEMENT (Admin only)
+# =============================================================================
+@app.get("/api/admin/staff")
+def get_staff(db: Session = Depends(get_db)):
+    staff = db.query(models.User).filter(models.User.role == "staff").all()
+    return [
+        {
+            "id": s.id,
+            "fullname": s.fullname,
+            "email": s.email,
+            "role_title": s.program or "Staff",
+            "is_primary": s.is_primary_admin
+        }
+        for s in staff
+    ]
+
+@app.post("/api/admin/staff")
+def create_staff(req: CreateStaffRequest, requester_email: str, db: Session = Depends(get_db)):
+    requester = db.query(models.User).filter(models.User.email == requester_email).first()
+    if not requester or requester.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can create staff accounts.")
+
+    if db.query(models.User).filter(models.User.email == req.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    new_staff = models.User(
+        email=req.email,
+        password_hash=hash_password(req.password),
+        fullname=req.fullname,
+        program=req.role,
+        role="staff",
+        is_primary_admin=False
+    )
+    db.add(new_staff)
+
+    audit = models.AdminAuditLog(
+        actor_admin_email=requester_email,
+        action_type="CREATED_STAFF",
+        target_email=req.email
+    )
+    db.add(audit)
+    db.commit()
+    return {"status": "success", "message": f"Staff {req.email} created successfully."}
+
+@app.put("/api/admin/staff/{user_id}")
+def update_staff(user_id: int, req: UpdateStaffRequest, requester_email: str, db: Session = Depends(get_db)):
+    requester = db.query(models.User).filter(models.User.email == requester_email).first()
+    if not requester or requester.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can edit staff accounts.")
+
+    staff = db.query(models.User).filter(models.User.id == user_id, models.User.role == "staff").first()
+    if not staff:
+        raise HTTPException(status_code=404, detail="Staff not found")
+
+    staff.fullname = req.fullname
+    staff.email = req.email
+    staff.program = req.role
+
+    audit = models.AdminAuditLog(
+        actor_admin_email=requester_email,
+        action_type="UPDATED_STAFF",
+        target_email=req.email
+    )
+    db.add(audit)
+    db.commit()
+    return {"status": "success"}
+
+@app.delete("/api/admin/staff/{user_id}")
+def delete_staff(user_id: int, requester_email: str, db: Session = Depends(get_db)):
+    requester = db.query(models.User).filter(models.User.email == requester_email).first()
+    if not requester or requester.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can delete staff accounts.")
+
+    staff = db.query(models.User).filter(models.User.id == user_id, models.User.role == "staff").first()
+    if not staff:
+        raise HTTPException(status_code=404, detail="Staff not found")
+
+    audit = models.AdminAuditLog(
+        actor_admin_email=requester_email,
+        action_type="DELETED_STAFF",
+        target_email=staff.email
+    )
+    db.add(audit)
+    db.delete(staff)
+    db.commit()
+    return {"status": "success"}
+
+# =============================================================================
+# SAVED AFFIRMATIONS (Student / User)
+# =============================================================================
+@app.get("/api/affirmations/{user_id}")
+def get_saved_affirmations(user_id: int, db: Session = Depends(get_db)):
+    affirmations = db.query(models.SavedAffirmation).filter(
+        models.SavedAffirmation.user_id == user_id
+    ).order_by(models.SavedAffirmation.created_at.desc()).all()
+    return [{"id": a.id, "text": a.text, "created_at": a.created_at.isoformat()} for a in affirmations]
+
+@app.post("/api/affirmations/{user_id}")
+def save_affirmation(user_id: int, req: SaveAffirmationRequest, db: Session = Depends(get_db)):
+    # Prevent duplicate saves
+    existing = db.query(models.SavedAffirmation).filter(
+        models.SavedAffirmation.user_id == user_id,
+        models.SavedAffirmation.text == req.text
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Already saved")
+
+    new_aff = models.SavedAffirmation(user_id=user_id, text=req.text)
+    db.add(new_aff)
+    db.commit()
+    db.refresh(new_aff)
+    return {"status": "success", "id": new_aff.id}
+
+@app.delete("/api/affirmations/{user_id}/{affirmation_id}")
+def delete_saved_affirmation(user_id: int, affirmation_id: int, db: Session = Depends(get_db)):
+    aff = db.query(models.SavedAffirmation).filter(
+        models.SavedAffirmation.id == affirmation_id,
+        models.SavedAffirmation.user_id == user_id
+    ).first()
+    if not aff:
+        raise HTTPException(status_code=404, detail="Affirmation not found")
+    db.delete(aff)
+    db.commit()
+    return {"status": "success"}
+
+# =============================================================================
+# SYSTEM AUDIT LOGS (Admin only)
+# =============================================================================
+@app.get("/api/admin/system-logs")
+def get_system_logs(db: Session = Depends(get_db)):
+    logs = db.query(models.AdminAuditLog).order_by(models.AdminAuditLog.timestamp.desc()).limit(200).all()
+    return [
+        {
+            "id": l.id,
+            "actor": l.actor_admin_email,
+            "action": l.action_type,
+            "target": l.target_email,
+            "timestamp": l.timestamp.isoformat()
+        }
+        for l in logs
+    ]
 
 if __name__ == "__main__":
     import uvicorn
